@@ -35,6 +35,12 @@ var can_fire :bool = true
 # when they stop moving. Default is DOWN.
 var last_direction := Vector2.DOWN
 
+# 부드러운 방향 전환을 위한 현재 조준 방향
+var aim_direction := Vector2.DOWN
+
+# 방향 전환 부드러움 (낮을수록 빠름, 0.05~0.3 권장)
+@export var direction_smoothing: float = 0.15
+
 # --- Mobile Controls ---
 # 모바일 컨트롤 UI 참조
 var mobile_controls: CanvasLayer = null
@@ -53,16 +59,18 @@ func _ready() -> void:
 		if parent:
 			mobile_controls = parent.get_node_or_null("MobileControls")
 
-# _process() is called every single visual frame. 
+# _process() is called every single visual frame.
 # Use this for things that need to look smooth, like updating animations or UI.
 # 'delta' is the time in seconds since the last frame.
-func _process(_delta: float) -> void:
-	# 1. Aim the Gun
-	# $GunPivot gets the node named "GunPivot".
-	# look_at() rotates the node so its positive X-axis points towards the target.
-	# get_global_mouse_position() gives us the mouse cursor's coordinates in the game world.
-	$GunPivot.look_at(get_global_mouse_position())
-	
+func _process(delta: float) -> void:
+	# 1. Aim the Gun (바라보는 방향으로)
+	# 부드럽게 aim_direction을 last_direction으로 보간
+	aim_direction = aim_direction.lerp(last_direction, 1.0 - pow(direction_smoothing, delta * 60))
+
+	# 방향 벡터를 각도로 변환하여 GunPivot 회전
+	if aim_direction != Vector2.ZERO:
+		$GunPivot.rotation = aim_direction.angle()
+
 	# 2. Update the character's sprite animation
 	update_animation()
 
