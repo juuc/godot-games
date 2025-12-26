@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="WorldConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://_shared/scripts/world_generator/world_config.gd" id="1_config"]
+
+[resource]
+script = ExtResource("1_config")
+noise_seed = 0
+noise_frequency = 0.001
+fractal_octaves = 7
+chunk_size = 16
+render_distance = 10
+generation_distance = 15
+render_budget = 2
+water_threshold = 0.0
+sand_start = -0.025
+sand_end = 0.15
+grass_start = 0.135
+grass_end = 0.55
+cliff_start = 0.535
+layer_water = 0
+layer_sand = 1
+layer_grass = 2
+layer_cliff = 3
+layer_env = 4
+terrain_water = 0
+terrain_sand = 1
+terrain_grass = 2
+terrain_cliff = 3
+tree_frequency = 0.003
+tree_spacing = 3
+decoration_buffer = 2
+tree_palm_1 = Vector2i(12, 2)
+tree_palm_2 = Vector2i(15, 2)
+tree_forest = Vector2i(15, 6)
+deep_water_threshold = -0.2
+deep_water_coords = Vector2i(0, 1)
+safe_spawn_min = 0.0
+safe_spawn_max = 0.45
+spawn_search_radius = 100

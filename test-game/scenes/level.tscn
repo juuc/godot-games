@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://ck7jmp85s0lst"]
+[gd_scene load_steps=9 format=3 uid="uid://ck7jmp85s0lst"]
 
 [ext_resource type="Texture2D" uid="uid://o0ijqtspq1ii" path="res://Assets/Paradise/FOR_TUTORIAL/tilemap1.png" id="1_2q6dc"]
 [ext_resource type="Script" uid="uid://dusw0ql8ndj2e" path="res://scenes/level.gd" id="1_w7c3h"]
 [ext_resource type="PackedScene" uid="uid://dhc5hhgu2tf0m" path="res://scenes/player.tscn" id="3_w8frs"]
 [ext_resource type="PackedScene" path="res://scenes/zoom_ui.tscn" id="4_zoomui"]
 [ext_resource type="PackedScene" path="res://scenes/mobile_controls.tscn" id="5_mobile"]
+[ext_resource type="Resource" path="res://resources/world_config.tres" id="6_config"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w8frs"]
 texture = ExtResource("1_2q6dc")
@@ -1284,7 +1285,7 @@ sources/0 = SubResource("TileSetAtlasSource_w8frs")
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_w7c3h")
-render_budget = 1
+world_config = ExtResource("6_config")
 
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = SubResource("TileSet_mx8sn")
