@@ -39,6 +39,9 @@ const NEIGHBORS = [
 ]
 
 func _ready() -> void:
+	# 미니맵 등에서 참조할 수 있도록 그룹 추가
+	add_to_group("level")
+
 	# Load default config if not set
 	if not world_config:
 		world_config = preload("res://resources/world_config.tres")

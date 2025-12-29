@@ -6,10 +6,11 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_y25gk"]
 size = Vector2(17, 16)
 
-[node name="Bullet" type="RigidBody2D"]
-collision_layer = 4
-collision_mask = 7
-gravity_scale = 0.0
+[node name="Bullet" type="Area2D"]
+collision_layer = 8
+collision_mask = 4
+monitoring = true
+monitorable = true
 script = ExtResource("1_y25gk")
 
 [node name="BulletSprite" type="Sprite2D" parent="."]

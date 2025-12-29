@@ -1,7 +1,4 @@
-extends RigidBody2D
+extends "res://_shared/scripts/weapons/projectile.gd"
 
-@export var bullet_life := 0.5
-
-func _ready() -> void:
-	await get_tree().create_timer(bullet_life).timeout
-	queue_free()
+## Test Game 탄환
+## Projectile 기본 동작 사용

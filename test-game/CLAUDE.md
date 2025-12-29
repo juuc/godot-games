@@ -1,5 +1,7 @@
 # test-game - Claude Code Context
 
+> **공유 모듈 문서**: [../docs/shared-modules.md](../docs/shared-modules.md)
+
 ## Project Overview
 
 2D 탑다운 슈터 with 무한 절차적 월드 생성. RapidWorldGen을 기반으로 하며, 모바일/PC 크로스 플랫폼 지원.
