@@ -21,18 +21,56 @@
 ```
 _shared/scripts/core/
 ├── event_bus.gd     # 전역 이벤트 버스 (느슨한 결합)
-└── game_manager.gd  # 게임 상태 (시간, 킬, XP, game over 등)
+├── game_manager.gd  # 게임 상태 (시간, 킬, XP, game over 등)
+└── audio_manager.gd # 중앙 오디오 관리 (SFX 풀, 음악)
 ```
 
 **EventBus 주요 시그널**:
 - `game_over(stats)`, `game_restarted`
-- `player_died`, `player_level_up`, `player_damaged`
+- `player_died`, `player_level_up`, `player_damaged`, `player_spawned`
 - `enemy_killed`, `enemy_spawned`
+- `pickup_collected`, `xp_gained`
 
 **GameManager 주요 기능**:
 - 게임 상태 관리 (PLAYING, PAUSED, GAME_OVER)
 - 통계 추적 (game_time, kill_count, total_xp)
 - `trigger_game_over()`, `restart_game()`
+
+### Weapon System
+
+데이터 기반 무기 시스템:
+
+```
+_shared/scripts/weapons/
+├── weapon_data.gd   # WeaponData 리소스 (데미지, 발사속도 등)
+└── weapon_base.gd   # 발사 로직, modifier 적용
+
+resources/weapons/
+├── default_pistol.tres  # 기본 권총
+├── shotgun.tres         # 산탄총 (5발사체)
+├── machinegun.tres      # 기관총 (빠른 연사)
+└── sniper.tres          # 저격총 (관통)
+```
+
+### Stat System
+
+중앙 집중식 스탯 계산:
+
+```
+_shared/scripts/progression/
+├── stat_modifier.gd  # FLAT, PERCENT, MULTIPLY 모드
+└── stat_manager.gd   # 스탯 계산, 캐싱
+```
+
+**사용 예시**:
+```gdscript
+# 스킬에서 자동 modifier 생성
+var modifier = skill.create_modifier(level)
+stat_manager.add_modifier(modifier)
+
+# 계산된 스탯 조회
+var speed = stat_manager.get_move_speed()
+```
 
 ### Shared Module (`_shared/scripts/world_generator/`)
 

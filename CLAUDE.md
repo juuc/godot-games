@@ -27,13 +27,18 @@ godot-games/
 |------|------|
 | `core/event_bus.gd` | 전역 이벤트 버스 (시스템 간 느슨한 결합) |
 | `core/game_manager.gd` | 게임 상태 관리 (시간, 킬, XP 등) |
-| `player/player_base.gd` | 체력, 무적, XP, 레벨업 |
+| `core/audio_manager.gd` | 중앙 오디오 관리 (SFX 풀, 음악, EventBus 연동) |
+| `player/player_base.gd` | 체력, 무적, XP, 레벨업, StatManager 통합 |
 | `enemies/enemy_base.gd` | 추적, 공격, 드롭 |
-| `enemies/spawn_manager.gd` | 웨이브 스폰 |
+| `enemies/spawn_manager.gd` | 웨이브 스폰, EventBus 연동 |
+| `weapons/weapon_data.gd` | 무기 데이터 리소스 (데미지, 발사속도 등) |
+| `weapons/weapon_base.gd` | 무기 로직 (발사, 쿨다운, modifier) |
 | `weapons/projectile.gd` | 발사체 |
-| `pickups/xp_gem.gd` | XP 젬 |
-| `progression/skill_data.gd` | 스킬 데이터 리소스 |
+| `pickups/xp_gem.gd` | XP 젬, EventBus 연동 |
+| `progression/skill_data.gd` | 스킬 데이터 (target_stat, modifier_mode) |
 | `progression/skill_manager.gd` | 스킬 관리 |
+| `progression/stat_modifier.gd` | 스탯 수정자 (FLAT, PERCENT, MULTIPLY) |
+| `progression/stat_manager.gd` | 중앙 스탯 계산기 |
 | `ui/skill_selection_ui.gd` | 스킬 선택 UI |
 
 ### Core 시스템 (Autoload)
