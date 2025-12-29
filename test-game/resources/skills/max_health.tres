@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://skill_max_health"]
+
+[ext_resource type="Script" path="res://_shared/scripts/progression/skill_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "max_health"
+display_name = "Max Health"
+description = "Increases maximum health"
+skill_type = 0
+max_level = 5
+level_values = [120, 150, 180, 220, 280]
+level_descriptions = ["Max HP: 120", "Max HP: 150", "Max HP: 180", "Max HP: 220", "Max HP: 280"]

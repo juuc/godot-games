@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://skill_attack_speed"]
+
+[ext_resource type="Script" path="res://_shared/scripts/progression/skill_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "attack_speed"
+display_name = "Attack Speed"
+description = "Increases fire rate"
+skill_type = 1
+max_level = 5
+level_values = [0.2, 0.18, 0.15, 0.12, 0.1]
+level_descriptions = ["Fire rate: 0.20s", "Fire rate: 0.18s", "Fire rate: 0.15s", "Fire rate: 0.12s", "Fire rate: 0.10s"]

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://_shared/scripts/enemies/enemy_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/crab_enemy.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_data")
+enemy_name = "Crab"
+scene = ExtResource("2_scene")
+max_health = 2.0
+move_speed = 40.0
+damage = 10.0
+knockback_resistance = 0.0
+xp_value = 1
+drop_chance = 1.0
+health_scale = 1.0
+damage_scale = 1.0

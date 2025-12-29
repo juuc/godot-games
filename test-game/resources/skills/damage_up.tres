@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://skill_damage_up"]
+
+[ext_resource type="Script" path="res://_shared/scripts/progression/skill_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "damage_up"
+display_name = "Damage Up"
+description = "Increases bullet damage"
+skill_type = 1
+max_level = 5
+level_values = [1.5, 2.0, 2.5, 3.0, 4.0]
+level_descriptions = ["Damage: 1.5", "Damage: 2.0", "Damage: 2.5", "Damage: 3.0", "Damage: 4.0"]
