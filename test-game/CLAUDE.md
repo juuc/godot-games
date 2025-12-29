@@ -14,6 +14,26 @@
 
 ## Architecture
 
+### Core System (Autoload)
+
+게임 상태 관리와 시스템 간 통신을 위한 싱글톤:
+
+```
+_shared/scripts/core/
+├── event_bus.gd     # 전역 이벤트 버스 (느슨한 결합)
+└── game_manager.gd  # 게임 상태 (시간, 킬, XP, game over 등)
+```
+
+**EventBus 주요 시그널**:
+- `game_over(stats)`, `game_restarted`
+- `player_died`, `player_level_up`, `player_damaged`
+- `enemy_killed`, `enemy_spawned`
+
+**GameManager 주요 기능**:
+- 게임 상태 관리 (PLAYING, PAUSED, GAME_OVER)
+- 통계 추적 (game_time, kill_count, total_xp)
+- `trigger_game_over()`, `restart_game()`
+
 ### Shared Module (`_shared/scripts/world_generator/`)
 
 모노레포에서 재사용 가능한 월드 생성 모듈:

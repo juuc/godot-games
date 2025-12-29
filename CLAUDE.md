@@ -25,6 +25,8 @@ godot-games/
 
 | 경로 | 설명 |
 |------|------|
+| `core/event_bus.gd` | 전역 이벤트 버스 (시스템 간 느슨한 결합) |
+| `core/game_manager.gd` | 게임 상태 관리 (시간, 킬, XP 등) |
 | `player/player_base.gd` | 체력, 무적, XP, 레벨업 |
 | `enemies/enemy_base.gd` | 추적, 공격, 드롭 |
 | `enemies/spawn_manager.gd` | 웨이브 스폰 |
@@ -33,6 +35,16 @@ godot-games/
 | `progression/skill_data.gd` | 스킬 데이터 리소스 |
 | `progression/skill_manager.gd` | 스킬 관리 |
 | `ui/skill_selection_ui.gd` | 스킬 선택 UI |
+
+### Core 시스템 (Autoload)
+
+새 게임에서 EventBus와 GameManager를 사용하려면 `project.godot`에 추가:
+
+```ini
+[autoload]
+EventBus="*res://_shared/scripts/core/event_bus.gd"
+GameManager="*res://_shared/scripts/core/game_manager.gd"
+```
 
 ## 새 게임 생성
 

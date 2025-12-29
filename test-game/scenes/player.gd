@@ -225,11 +225,11 @@ func _shoot() -> void:
 	else:
 		can_fire = true
 
-## 사망 시 처리 (게임오버 대신 리셋)
+## 사망 시 처리
 func _on_die() -> void:
 	print("Player died!")
-	current_health = max_health
-	health_changed.emit(current_health, max_health)
+	# 사망 애니메이션이나 효과 추가 가능
+	# 게임오버는 Level에서 died 시그널로 처리
 
 ## 레벨업 시 처리 - 스킬 선택 UI 표시
 func _on_level_up() -> void:

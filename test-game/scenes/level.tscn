@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://ck7jmp85s0lst"]
+[gd_scene load_steps=14 format=3 uid="uid://ck7jmp85s0lst"]
 
 [ext_resource type="Texture2D" uid="uid://o0ijqtspq1ii" path="res://Assets/Paradise/FOR_TUTORIAL/tilemap1.png" id="1_2q6dc"]
 [ext_resource type="Script" uid="uid://dusw0ql8ndj2e" path="res://scenes/level.gd" id="1_w7c3h"]
@@ -10,6 +10,7 @@
 [ext_resource type="Resource" path="res://resources/enemies/crab_data.tres" id="8_crab"]
 [ext_resource type="PackedScene" uid="uid://hud_001" path="res://scenes/ui/hud.tscn" id="9_hud"]
 [ext_resource type="PackedScene" uid="uid://minimap_001" path="res://scenes/ui/minimap.tscn" id="10_minimap"]
+[ext_resource type="PackedScene" uid="uid://gameover_001" path="res://scenes/ui/game_over.tscn" id="11_gameover"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w8frs"]
 texture = ExtResource("1_2q6dc")
@@ -1321,3 +1322,5 @@ max_spawn_distance = 150.0
 layer = 6
 
 [node name="Minimap" parent="MinimapUI" instance=ExtResource("10_minimap")]
+
+[node name="GameOver" parent="." instance=ExtResource("11_gameover")]

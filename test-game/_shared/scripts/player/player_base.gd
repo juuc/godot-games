@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 ## 모든 플레이어의 기본 클래스
 ## 체력, 이동, 데미지 처리를 담당합니다.
+## EventBus를 통해 이벤트 발행
 
 signal health_changed(current: float, max_health: float)
 signal died()
@@ -29,9 +30,16 @@ var last_direction := Vector2.DOWN
 # --- Sprite Reference (자식에서 설정) ---
 var player_sprite: AnimatedSprite2D
 
+# --- EventBus Reference ---
+var event_bus: Node = null
+
 func _ready() -> void:
 	add_to_group("player")
 	current_health = max_health
+
+	# EventBus 참조 획득
+	event_bus = get_node_or_null("/root/EventBus")
+
 	_on_ready()
 
 ## 자식 클래스에서 오버라이드
@@ -85,7 +93,13 @@ func take_damage(amount: float, _knockback_dir: Vector2 = Vector2.ZERO) -> void:
 		return
 
 	current_health -= amount
+
+	# 로컬 시그널
 	health_changed.emit(current_health, max_health)
+
+	# EventBus로 이벤트 발행
+	if event_bus:
+		event_bus.player_damaged.emit(self, amount, current_health)
 
 	_flash_damage()
 	_start_invincibility()
@@ -122,7 +136,13 @@ func _start_invincibility() -> void:
 
 ## 사망 처리
 func _die() -> void:
+	# 로컬 시그널
 	died.emit()
+
+	# EventBus로 이벤트 발행
+	if event_bus:
+		event_bus.player_died.emit(self, global_position)
+
 	_on_die()
 
 ## 자식에서 오버라이드 (게임오버 등)
@@ -132,7 +152,13 @@ func _on_die() -> void:
 ## 체력 회복
 func heal(amount: float) -> void:
 	current_health = min(current_health + amount, max_health)
+
+	# 로컬 시그널
 	health_changed.emit(current_health, max_health)
+
+	# EventBus로 이벤트 발행
+	if event_bus:
+		event_bus.player_healed.emit(self, amount, current_health)
 
 # --- Experience System ---
 
@@ -150,8 +176,14 @@ func _level_up() -> void:
 	current_level += 1
 	xp_to_next_level = _calculate_xp_for_level(current_level)
 
+	# 로컬 시그널
 	level_up.emit(current_level)
 	xp_changed.emit(current_xp, xp_to_next_level)
+
+	# EventBus로 이벤트 발행
+	if event_bus:
+		event_bus.player_level_up.emit(self, current_level)
+
 	_on_level_up()
 
 ## 레벨업 시 호출 (자식에서 오버라이드)

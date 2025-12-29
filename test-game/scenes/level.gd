@@ -2,6 +2,7 @@ extends Node2D
 
 ## World Generator를 사용하는 레벨 스크립트
 ## WorldConfig 리소스로 설정을 외부화하여 재사용 가능
+## GameManager와 EventBus로 게임 상태 관리 위임
 
 # --- Configuration ---
 @export var world_config: WorldConfig
@@ -27,6 +28,10 @@ var debug_sprites: Dictionary = {}
 # --- Autotiling Rules ---
 var tile_rules: Dictionary = {}
 
+# --- Core System References ---
+var game_manager: Node = null
+var event_bus: Node = null
+
 const NEIGHBORS = [
 	TileSet.CELL_NEIGHBOR_RIGHT_SIDE,
 	TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_CORNER,
@@ -41,6 +46,15 @@ const NEIGHBORS = [
 func _ready() -> void:
 	# 미니맵 등에서 참조할 수 있도록 그룹 추가
 	add_to_group("level")
+
+	# Core system references
+	game_manager = get_node_or_null("/root/GameManager")
+	event_bus = get_node_or_null("/root/EventBus")
+
+	# GameManager에 레벨 등록
+	if game_manager:
+		game_manager.register_level(self)
+		game_manager.start_game()
 
 	# Load default config if not set
 	if not world_config:
@@ -60,10 +74,31 @@ func _ready() -> void:
 	var spawn_tile = generator.find_safe_spawn()
 	if player:
 		player.position = tile_map.map_to_local(spawn_tile)
+		# 플레이어 사망 시그널 연결
+		player.died.connect(_on_player_died)
+
+		# EventBus로 플레이어 스폰 알림
+		if event_bus:
+			event_bus.player_spawned.emit(player)
 
 	# Build autotiling rules from TileSet
 	_build_tile_rules()
 	_setup_tree_alternatives()
+
+## 플레이어 사망 처리 (player.died 로컬 시그널에서 호출)
+## 참고: PlayerBase._die()에서 이미 EventBus.player_died를 발행하므로
+## 여기서는 EventBus가 없는 경우의 폴백만 처리
+func _on_player_died() -> void:
+	# EventBus 없을 때만 직접 처리 (PlayerBase에서 이미 EventBus로 발행함)
+	if not event_bus and game_manager:
+		game_manager.trigger_game_over()
+
+## 적 처치 시 호출 (SpawnManager나 Enemy에서 호출) - 하위 호환성 유지
+func on_enemy_killed(xp_value: int = 0) -> void:
+	# EventBus가 없을 때를 위한 폴백
+	if game_manager and not event_bus:
+		game_manager.kill_count += 1
+		game_manager.total_xp += xp_value
 
 func _setup_tree_alternatives() -> void:
 	var source: TileSetAtlasSource = tile_map.tile_set.get_source(0)
@@ -118,8 +153,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if debug_container:
 			debug_container.visible = not debug_container.visible
 
-func _process(_delta: float) -> void:
-	if not player:
+func _process(delta: float) -> void:
+	# GameManager 상태 체크
+	var is_game_over = game_manager.is_game_over if game_manager else false
+
+	if not player or is_game_over:
 		return
 
 	var player_pos = tile_map.local_to_map(player.position)

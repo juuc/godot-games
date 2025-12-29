@@ -197,7 +197,13 @@ func _die() -> void:
 	is_dead = true
 	died.emit(self, global_position)
 
-	# 드롭 처리 (나중에 구현)
+	# 레벨에 킬 통보
+	var level = get_tree().get_first_node_in_group("level")
+	if level and level.has_method("on_enemy_killed"):
+		var xp = enemy_data.xp_value if enemy_data else 0
+		level.on_enemy_killed(xp)
+
+	# 드롭 처리
 	_spawn_drops()
 
 	queue_free()

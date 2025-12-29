@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 ## 모든 적의 기본 클래스
 ## 체력, 이동, 데미지 처리를 담당합니다.
+## EventBus를 통해 이벤트 발행
 
 signal died(enemy: EnemyBase, position: Vector2)
 signal damaged(enemy: EnemyBase, amount: float)
@@ -13,6 +14,9 @@ signal damaged(enemy: EnemyBase, amount: float)
 var current_health: float
 var target: Node2D  ## 추적 대상 (플레이어)
 var is_dead: bool = false
+
+## EventBus 참조
+var event_bus: Node = null
 
 ## 넉백
 var knockback_velocity: Vector2 = Vector2.ZERO
@@ -41,6 +45,9 @@ var attack_frames_end: int = 9
 func _ready() -> void:
 	add_to_group("enemies")
 
+	# EventBus 참조 획득
+	event_bus = get_node_or_null("/root/EventBus")
+
 	if enemy_data:
 		current_health = enemy_data.max_health
 	else:
@@ -48,6 +55,10 @@ func _ready() -> void:
 
 	# 스프라이트 찾기
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
+
+	# 스폰 이벤트 발행
+	if event_bus:
+		event_bus.enemy_spawned.emit(self)
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -168,7 +179,13 @@ func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knockback
 		return
 
 	current_health -= amount
+
+	# 로컬 시그널 발행
 	damaged.emit(self, amount)
+
+	# EventBus로 이벤트 발행
+	if event_bus:
+		event_bus.enemy_damaged.emit(self, amount)
 
 	# 넉백 적용
 	if knockback_force > 0 and enemy_data:
@@ -195,9 +212,21 @@ func _die() -> void:
 		return
 
 	is_dead = true
+	var xp = enemy_data.xp_value if enemy_data else 0
+
+	# 로컬 시그널 발행
 	died.emit(self, global_position)
 
-	# 드롭 처리 (나중에 구현)
+	# EventBus로 이벤트 발행 (권장)
+	if event_bus:
+		event_bus.enemy_killed.emit(self, global_position, xp)
+	else:
+		# 폴백: 직접 레벨에 통보 (하위 호환성)
+		var level = get_tree().get_first_node_in_group("level")
+		if level and level.has_method("on_enemy_killed"):
+			level.on_enemy_killed(xp)
+
+	# 드롭 처리
 	_spawn_drops()
 
 	queue_free()
