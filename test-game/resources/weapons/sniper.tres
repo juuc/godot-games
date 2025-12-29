@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://weapon_sniper"]
+
+[ext_resource type="Script" path="res://_shared/scripts/weapons/weapon_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "sniper"
+display_name = "Sniper Rifle"
+description = "저격총. 높은 데미지, 관통, 느린 연사."
+base_damage = 5.0
+fire_rate = 1.2
+knockback_force = 300.0
+projectile_speed = 4000.0
+projectile_lifetime = 1.0
+projectiles_per_shot = 1
+spread_angle = 0.0
+auto_fire = true
+auto_aim = false
+pierce_count = 3

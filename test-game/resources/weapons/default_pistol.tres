@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://weapon_default_pistol"]
+
+[ext_resource type="Script" path="res://_shared/scripts/weapons/weapon_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "default_pistol"
+display_name = "Default Pistol"
+description = "기본 권총. 균형 잡힌 성능."
+base_damage = 1.0
+fire_rate = 0.25
+knockback_force = 100.0
+projectile_speed = 2000.0
+projectile_lifetime = 0.5
+projectiles_per_shot = 1
+spread_angle = 0.0
+auto_fire = true
+auto_aim = false
+pierce_count = 0

@@ -10,7 +10,9 @@ extends Node2D
 
 # References to child nodes
 @onready var tile_map: TileMap = $TileMap
-@onready var player: Node2D = $Player
+
+# Player reference (동적으로 관리 - 직접 참조 대신 EventBus 사용)
+var player: Node2D = null
 
 # World Generator instance (uses shared module)
 var generator: WorldGenerator
@@ -51,6 +53,10 @@ func _ready() -> void:
 	game_manager = get_node_or_null("/root/GameManager")
 	event_bus = get_node_or_null("/root/EventBus")
 
+	# EventBus 이벤트 구독 (느슨한 결합)
+	if event_bus:
+		event_bus.player_died.connect(_on_player_died_event)
+
 	# GameManager에 레벨 등록
 	if game_manager:
 		game_manager.register_level(self)
@@ -70,30 +76,37 @@ func _ready() -> void:
 	debug_container.z_index = 4
 	add_child(debug_container)
 
-	# Find safe spawn for player
-	var spawn_tile = generator.find_safe_spawn()
-	if player:
-		player.position = tile_map.map_to_local(spawn_tile)
-		# 플레이어 사망 시그널 연결
-		player.died.connect(_on_player_died)
-
-		# EventBus로 플레이어 스폰 알림
-		if event_bus:
-			event_bus.player_spawned.emit(player)
+	# 플레이어 찾기 및 스폰 위치 설정
+	_setup_player()
 
 	# Build autotiling rules from TileSet
 	_build_tile_rules()
 	_setup_tree_alternatives()
 
-## 플레이어 사망 처리 (player.died 로컬 시그널에서 호출)
-## 참고: PlayerBase._die()에서 이미 EventBus.player_died를 발행하므로
-## 여기서는 EventBus가 없는 경우의 폴백만 처리
-func _on_player_died() -> void:
-	# EventBus 없을 때만 직접 처리 (PlayerBase에서 이미 EventBus로 발행함)
-	if not event_bus and game_manager:
-		game_manager.trigger_game_over()
+## 플레이어 설정 (동적 탐색 및 스폰)
+func _setup_player() -> void:
+	# 씬 내 플레이어 또는 그룹에서 찾기
+	player = get_node_or_null("Player")
+	if not player:
+		player = get_tree().get_first_node_in_group("player")
 
-## 적 처치 시 호출 (SpawnManager나 Enemy에서 호출) - 하위 호환성 유지
+	if not player:
+		return
+
+	# 안전한 스폰 위치 설정
+	var spawn_tile = generator.find_safe_spawn()
+	player.position = tile_map.map_to_local(spawn_tile)
+
+	# EventBus로 플레이어 스폰 알림
+	if event_bus:
+		event_bus.player_spawned.emit(player)
+
+## 플레이어 사망 이벤트 처리 (EventBus에서 수신)
+func _on_player_died_event(_player: Node2D, _position: Vector2) -> void:
+	# EventBus 통해 GameManager가 이미 처리하므로 여기서는 추가 로직만
+	pass
+
+## 적 처치 시 호출 (하위 호환성) - 새 코드는 EventBus.enemy_killed 사용 권장
 func on_enemy_killed(xp_value: int = 0) -> void:
 	# EventBus가 없을 때를 위한 폴백
 	if game_manager and not event_bus:

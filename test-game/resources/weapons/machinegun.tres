@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://weapon_machinegun"]
+
+[ext_resource type="Script" path="res://_shared/scripts/weapons/weapon_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "machinegun"
+display_name = "Machine Gun"
+description = "기관총. 빠른 연사 속도, 낮은 데미지."
+base_damage = 0.5
+fire_rate = 0.08
+knockback_force = 50.0
+projectile_speed = 2500.0
+projectile_lifetime = 0.4
+projectiles_per_shot = 1
+spread_angle = 5.0
+auto_fire = true
+auto_aim = false
+pierce_count = 0

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://weapon_shotgun"]
+
+[ext_resource type="Script" path="res://_shared/scripts/weapons/weapon_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "shotgun"
+display_name = "Shotgun"
+description = "산탄총. 근거리에서 강력한 다중 발사체."
+base_damage = 0.8
+fire_rate = 0.6
+knockback_force = 200.0
+projectile_speed = 1500.0
+projectile_lifetime = 0.3
+projectiles_per_shot = 5
+spread_angle = 20.0
+auto_fire = true
+auto_aim = false
+pierce_count = 0
