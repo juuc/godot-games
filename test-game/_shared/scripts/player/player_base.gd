@@ -4,20 +4,23 @@ extends CharacterBody2D
 ## 모든 플레이어의 기본 클래스
 ## 체력, 이동, 데미지 처리를 담당합니다.
 ## EventBus를 통해 이벤트 발행
+## StatManager로 스탯 관리
 
 signal health_changed(current: float, max_health: float)
 signal died()
 signal level_up(new_level: int)
 signal xp_changed(current: int, required: int)
+signal stats_updated()
 
-# --- Movement ---
-@export var speed: int = 200
+# --- Base Stats (초기값, StatManager에 전달) ---
+@export_group("Base Stats")
+@export var base_speed: float = 200.0
+@export var base_max_health: float = 100.0
+@export var base_invincibility_duration: float = 1.0
 
-# --- Health ---
-@export var max_health: float = 100.0
+# --- Runtime State ---
 var current_health: float
 var is_invincible: bool = false
-@export var invincibility_duration: float = 1.0
 
 # --- Experience ---
 var current_xp: int = 0
@@ -30,17 +33,61 @@ var last_direction := Vector2.DOWN
 # --- Sprite Reference (자식에서 설정) ---
 var player_sprite: AnimatedSprite2D
 
-# --- EventBus Reference ---
+# --- Core Systems ---
 var event_bus: Node = null
+var stat_manager = null  ## StatManager 인스턴스
+
+# --- Computed Stats (StatManager에서 계산) ---
+var speed: float:
+	get:
+		if stat_manager:
+			return stat_manager.get_move_speed()
+		return base_speed
+
+var max_health: float:
+	get:
+		if stat_manager:
+			return stat_manager.get_max_health()
+		return base_max_health
+
+var invincibility_duration: float:
+	get:
+		if stat_manager:
+			return stat_manager.get_stat(11)  # INVINCIBILITY_DURATION
+		return base_invincibility_duration
 
 func _ready() -> void:
 	add_to_group("player")
-	current_health = max_health
 
 	# EventBus 참조 획득
 	event_bus = get_node_or_null("/root/EventBus")
 
+	# StatManager 초기화
+	_init_stat_manager()
+
+	current_health = max_health
+
 	_on_ready()
+
+## StatManager 초기화
+func _init_stat_manager() -> void:
+	var StatManagerClass = load("res://_shared/scripts/progression/stat_manager.gd")
+	if StatManagerClass:
+		stat_manager = StatManagerClass.new()
+		# 기본 스탯 설정
+		stat_manager.set_base_stat(0, base_max_health)  # MAX_HEALTH
+		stat_manager.set_base_stat(1, base_speed)       # MOVE_SPEED
+		stat_manager.set_base_stat(11, base_invincibility_duration)  # INVINCIBILITY_DURATION
+		stat_manager.stats_changed.connect(_on_stats_changed)
+
+## 스탯 변경 시 호출
+func _on_stats_changed() -> void:
+	# 최대 체력이 증가하면 현재 체력도 비례해서 증가
+	var new_max = max_health
+	if current_health > new_max:
+		current_health = new_max
+	health_changed.emit(current_health, new_max)
+	stats_updated.emit()
 
 ## 자식 클래스에서 오버라이드
 func _on_ready() -> void:
@@ -193,3 +240,42 @@ func _on_level_up() -> void:
 ## 레벨별 필요 경험치 계산
 func _calculate_xp_for_level(level: int) -> int:
 	return 10 + (level - 1) * 5
+
+# --- Stat Modifier API ---
+
+## 스킬에서 수정자 적용
+func apply_skill_modifier(skill, level: int) -> void:
+	if not stat_manager:
+		return
+
+	# 기존 스킬 수정자 제거
+	stat_manager.remove_modifiers_by_source(skill.id)
+
+	# 새 수정자 생성 및 적용
+	if skill.has_method("create_modifier"):
+		var modifier = skill.create_modifier(level)
+		if modifier:
+			stat_manager.add_modifier(modifier)
+
+## 모든 스킬 수정자 재적용 (SkillManager와 연동)
+func apply_all_skill_modifiers(skill_manager) -> void:
+	if not stat_manager:
+		return
+
+	# 모든 수정자 초기화
+	stat_manager.clear_modifiers()
+
+	# 획득한 스킬들의 수정자 적용
+	if skill_manager and skill_manager.has_method("get_acquired_skills"):
+		var acquired = skill_manager.get_acquired_skills()
+		for skill_id in acquired:
+			var skill = skill_manager.get_skill(skill_id)
+			var skill_level = skill_manager.get_skill_level(skill_id)
+			if skill and skill.has_method("create_modifier"):
+				var modifier = skill.create_modifier(skill_level)
+				if modifier:
+					stat_manager.add_modifier(modifier)
+
+## StatManager 직접 접근 (고급 사용)
+func get_stat_manager():
+	return stat_manager

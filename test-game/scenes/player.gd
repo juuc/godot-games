@@ -1,21 +1,14 @@
 extends "res://_shared/scripts/player/player_base.gd"
 
 ## Test Game 플레이어
-## 자동 발사, 지형 충돌, 애니메이션, 스킬 시스템
+## WeaponBase 기반 무기 시스템, 지형 충돌, 애니메이션, 스킬 시스템
 
 const SkillManagerClass = preload("res://_shared/scripts/progression/skill_manager.gd")
+const WeaponBaseClass = preload("res://_shared/scripts/weapons/weapon_base.gd")
 
-# --- Bullet / Combat Settings ---
-@export var bullet_scene: PackedScene = preload("res://scenes/bullet.tscn")
-@export var bullet_speed: int = 2000
-@export var base_fire_rate: float = 0.25
-@export var base_damage: float = 1.0
-@export var shoot_sound: bool = false
-@export var rapid_fire: bool = false
-
-var fire_rate: float = 0.25
-var bullet_damage: float = 1.0
-var can_fire: bool = true
+# --- Weapon ---
+@export var weapon_data: Resource  ## WeaponData 리소스
+var weapon: Node2D = null  ## WeaponBase 인스턴스
 
 # --- Animation State ---
 var aim_direction := Vector2.DOWN
@@ -43,6 +36,9 @@ func _on_ready() -> void:
 	# 시작 애니메이션
 	player_sprite.play("idle_down")
 
+	# 무기 시스템 초기화
+	_setup_weapon()
+
 	# 스킬 시스템 초기화
 	_setup_skill_system()
 
@@ -50,9 +46,43 @@ func _on_ready() -> void:
 	await get_tree().process_frame
 	mobile_controls = get_tree().get_first_node_in_group("mobile_controls")
 	if not mobile_controls:
-		var parent = get_parent()
-		if parent:
-			mobile_controls = parent.get_node_or_null("MobileControls")
+		var parent_node = get_parent()
+		if parent_node:
+			mobile_controls = parent_node.get_node_or_null("MobileControls")
+
+## 무기 시스템 초기화
+func _setup_weapon() -> void:
+	# GunPivot 아래에 Weapon 노드 생성
+	weapon = WeaponBaseClass.new()
+	weapon.name = "Weapon"
+
+	# WeaponData가 없으면 기본 무기 데이터 로드
+	if weapon_data:
+		weapon.weapon_data = weapon_data
+	else:
+		weapon.weapon_data = _create_default_weapon_data()
+
+	# Muzzle 위치 설정
+	var muzzle = Node2D.new()
+	muzzle.name = "Muzzle"
+	muzzle.position = Vector2(16, 0)  # GunPivot 기준 오프셋
+	weapon.add_child(muzzle)
+
+	$GunPivot.add_child(weapon)
+
+## 기본 무기 데이터 생성
+func _create_default_weapon_data() -> Resource:
+	var WeaponDataClass = load("res://_shared/scripts/weapons/weapon_data.gd")
+	var data = WeaponDataClass.new()
+	data.id = "default_gun"
+	data.display_name = "Default Gun"
+	data.base_damage = 1.0
+	data.fire_rate = 0.25
+	data.projectile_speed = 2000.0
+	data.projectile_lifetime = 0.5
+	data.auto_fire = true
+	data.projectile_scene = preload("res://scenes/bullet.tscn")
+	return data
 
 ## 스킬 시스템 초기화
 func _setup_skill_system() -> void:
@@ -99,12 +129,16 @@ func _process(delta: float) -> void:
 	if aim_direction != Vector2.ZERO:
 		$GunPivot.rotation = aim_direction.angle()
 
+		# 무기에 조준 방향 전달
+		if weapon:
+			weapon.set_aim_direction(aim_direction)
+
 	_update_animation()
 
 func _on_physics_process(_delta: float) -> void:
-	# 자동 발사 (뱀서라이크)
-	if can_fire:
-		_shoot()
+	# 자동 발사 (WeaponBase가 처리)
+	if weapon:
+		weapon.auto_fire_tick()
 
 ## 입력 방향 (모바일 조이스틱 지원)
 func _get_input_direction() -> Vector2:
@@ -120,32 +154,32 @@ func _get_input_direction() -> Vector2:
 func _calculate_velocity(direction: Vector2, delta: float) -> Vector2:
 	var potential_vel = direction * speed
 
-	var level = get_parent()
-	if level.has_method("is_tile_walkable"):
+	var level_node = get_parent()
+	if level_node and level_node.has_method("is_tile_walkable"):
 		# X축 체크
 		var target_x = global_position + Vector2(potential_vel.x * delta, 0)
-		if not _is_position_safe(target_x, level):
+		if not _is_position_safe(target_x, level_node):
 			potential_vel.x = 0
 
 		# Y축 체크
 		var target_y = global_position + Vector2(0, potential_vel.y * delta)
-		if not _is_position_safe(target_y, level):
+		if not _is_position_safe(target_y, level_node):
 			potential_vel.y = 0
 
 	return potential_vel
 
 ## 위치 안전 체크 (지형 충돌)
-func _is_position_safe(target_pos: Vector2, level: Node) -> bool:
+func _is_position_safe(target_pos: Vector2, level_node: Node) -> bool:
 	if not has_node("CollisionShape2D"):
-		return level.is_tile_walkable(target_pos)
+		return level_node.is_tile_walkable(target_pos)
 
 	var col = $CollisionShape2D
-	var shape = col.shape
+	var col_shape = col.shape
 
-	if not shape is RectangleShape2D:
-		return level.is_tile_walkable(target_pos + col.position)
+	if not col_shape is RectangleShape2D:
+		return level_node.is_tile_walkable(target_pos + col.position)
 
-	var half_size = (shape.size * col.scale) / 2
+	var half_size = (col_shape.size * col.scale) / 2
 	var center = col.position
 
 	var corners = [
@@ -156,17 +190,17 @@ func _is_position_safe(target_pos: Vector2, level: Node) -> bool:
 	]
 
 	for p in corners:
-		if not level.is_tile_walkable(p):
+		if not level_node.is_tile_walkable(p):
 			return false
 
 	return true
 
 ## 현재 위치가 유효한지 체크 (밀림 방지)
 func _is_current_position_valid() -> bool:
-	var level = get_parent()
-	if not level or not level.has_method("is_tile_walkable"):
+	var level_node = get_parent()
+	if not level_node or not level_node.has_method("is_tile_walkable"):
 		return true
-	return _is_position_safe(global_position, level)
+	return _is_position_safe(global_position, level_node)
 
 ## 애니메이션 업데이트
 func _update_animation() -> void:
@@ -197,39 +231,9 @@ func _update_animation() -> void:
 	if player_sprite.animation != final_anim:
 		player_sprite.play(final_anim)
 
-## 발사
-func _shoot() -> void:
-	can_fire = false
-
-	if shoot_sound:
-		$ShootSound.play()
-
-	var bullet_instance = bullet_scene.instantiate()
-	var spawn_pos = $GunPivot/BulletOrigin.global_position
-	bullet_instance.global_position = spawn_pos
-
-	var direction_rotation = $GunPivot.rotation
-	bullet_instance.rotation = direction_rotation
-
-	var direction_vector = Vector2.RIGHT.rotated(direction_rotation)
-	bullet_instance.direction = direction_vector
-
-	# 스킬로 강화된 데미지 적용
-	bullet_instance.damage = bullet_damage
-
-	get_tree().root.add_child(bullet_instance)
-
-	if not rapid_fire:
-		await get_tree().create_timer(fire_rate).timeout
-		can_fire = true
-	else:
-		can_fire = true
-
 ## 사망 시 처리
 func _on_die() -> void:
 	print("Player died!")
-	# 사망 애니메이션이나 효과 추가 가능
-	# 게임오버는 Level에서 died 시그널로 처리
 
 ## 레벨업 시 처리 - 스킬 선택 UI 표시
 func _on_level_up() -> void:
@@ -246,41 +250,31 @@ func _on_skill_selected(skill) -> void:
 	print("Selected skill: ", skill.display_name)
 
 ## 스킬 획득/업그레이드 시 효과 적용
-func _on_skill_changed(skill, _level: int) -> void:
-	_apply_skill_effects()
+func _on_skill_changed(skill, skill_level: int) -> void:
+	# StatManager 기반 수정자 적용
+	if skill.has_method("has_stat_modifier") and skill.has_stat_modifier():
+		apply_skill_modifier(skill, skill_level)
 
-## 모든 스킬 효과 재계산
-func _apply_skill_effects() -> void:
-	# 기본값으로 리셋
-	fire_rate = base_fire_rate
-	bullet_damage = base_damage
-	speed = 200
-	max_health = 100.0
+	# 무기 스탯 업데이트
+	_update_weapon_stats()
 
-	if not skill_manager:
+	_debug_print_stats()
+
+## 무기 스탯 업데이트 (StatManager → Weapon)
+func _update_weapon_stats() -> void:
+	if not weapon or not stat_manager:
 		return
 
-	# Attack Speed
-	var attack_speed_value = skill_manager.get_skill_value("attack_speed")
-	if attack_speed_value > 0:
-		fire_rate = attack_speed_value
+	# StatManager에서 무기 관련 스탯 가져와서 적용
+	weapon.set_damage_multiplier(stat_manager.get_damage())
+	weapon.set_fire_rate_multiplier(stat_manager.get_fire_rate() / weapon.weapon_data.fire_rate)
+	weapon.set_additional_projectiles(stat_manager.get_projectile_count() - 1)
 
-	# Damage Up
-	var damage_value = skill_manager.get_skill_value("damage_up")
-	if damage_value > 0:
-		bullet_damage = damage_value
-
-	# Move Speed
-	var move_speed_value = skill_manager.get_skill_value("move_speed")
-	if move_speed_value > 0:
-		speed = int(move_speed_value)
-
-	# Max Health
-	var max_health_value = skill_manager.get_skill_value("max_health")
-	if max_health_value > 0:
-		var health_ratio = current_health / max_health
-		max_health = max_health_value
-		current_health = max_health * health_ratio
-		health_changed.emit(current_health, max_health)
-
-	print("Skills applied - Fire rate: ", fire_rate, " Damage: ", bullet_damage, " Speed: ", speed, " Max HP: ", max_health)
+## 디버그 출력
+func _debug_print_stats() -> void:
+	if stat_manager:
+		print("Stats - Speed: %.0f, MaxHP: %.0f, Damage: %.1f, FireRate: %.2f" % [
+			speed, max_health,
+			stat_manager.get_damage(),
+			stat_manager.get_fire_rate()
+		])
