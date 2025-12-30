@@ -23,6 +23,10 @@ signal wave_changed(wave: int, health_mult: float, damage_mult: float)
 @export var health_scale_per_wave: float = 0.1  ## 웨이브당 체력 증가율 (10%)
 @export var damage_scale_per_wave: float = 0.05  ## 웨이브당 데미지 증가율 (5%)
 
+@export_group("Elite Settings")
+@export var elite_spawn_interval: float = 60.0  ## Elite 스폰 간격 (초)
+@export var elite_stat_multiplier: float = 3.0  ## Elite 스탯 배수
+
 @export_group("Spawn Area")
 @export var min_spawn_distance: float = 400.0  ## 최소 스폰 거리
 @export var max_spawn_distance: float = 550.0  ## 최대 스폰 거리
@@ -34,6 +38,7 @@ signal wave_changed(wave: int, health_mult: float, damage_mult: float)
 @export var spawn_container: Node  ## 적이 추가될 컨테이너 (미설정 시 부모 노드)
 
 var spawn_timer: float = 0.0
+var elite_spawn_timer: float = 0.0  ## Elite 스폰 타이머
 var current_enemy_count: int = 0  ## 일반 적 수
 var current_elite_count: int = 0  ## 엘리트 적 수 (별도 관리)
 var game_time: float = 0.0  ## 게임 시간 (난이도 스케일링용)
@@ -87,6 +92,7 @@ func _on_game_restarted() -> void:
 	current_enemy_count = 0
 	current_elite_count = 0
 	spawn_timer = 0.0
+	elite_spawn_timer = 0.0
 	game_time = 0.0
 
 	# 웨이브 초기화
@@ -143,14 +149,21 @@ func _process(delta: float) -> void:
 
 	game_time += delta
 	spawn_timer += delta
+	elite_spawn_timer += delta
 
 	# 난이도 스케일링 체크
 	if enable_difficulty_scaling:
 		_check_wave_advance()
 
+	# 일반 적 스폰
 	if spawn_timer >= spawn_interval:
 		spawn_timer = 0.0
 		_spawn_enemies()
+
+	# Elite 스폰 (시간 기반)
+	if elite_spawn_timer >= elite_spawn_interval:
+		elite_spawn_timer = 0.0
+		_spawn_elite_enemy()
 
 ## 웨이브 진행 체크 및 난이도 증가
 func _check_wave_advance() -> void:
@@ -353,6 +366,18 @@ func clear_all_enemies() -> void:
 	current_enemy_count = 0
 	current_elite_count = 0
 
+## 자동 Elite 스폰 (타이머 기반)
+func _spawn_elite_enemy() -> void:
+	if enemy_data_list.is_empty():
+		return
+
+	# 랜덤 적 데이터 선택
+	var enemy_data = enemy_data_list[randi() % enemy_data_list.size()]
+	var elite = spawn_elite(enemy_data)
+
+	if elite:
+		print("[Elite Spawn] %s spawned at wave %d" % [enemy_data.enemy_name, current_wave])
+
 ## 엘리트 적 스폰 (max_enemies 제한 무시)
 func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBase:
 	if not data or not data.scene:
@@ -381,7 +406,6 @@ func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBas
 		return null
 
 	enemy.enemy_data = data
-	enemy.is_elite = true
 
 	enemy.died.connect(_on_enemy_died)
 
@@ -392,6 +416,9 @@ func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBas
 
 	if player:
 		enemy.set_target(player)
+
+	# Elite 시각 효과 및 스탯 적용
+	enemy.apply_elite_visuals(elite_stat_multiplier)
 
 	# 엘리트에도 난이도 스케일링 적용
 	_apply_difficulty_scaling(enemy)

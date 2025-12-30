@@ -73,6 +73,19 @@ func _setup_default_poi_configs() -> void:
 	health_config.show_direction_indicator = true
 	poi_configs["health_pack"] = health_config
 
+	# Elite 적
+	var elite_config = MinimapPOIConfig.new()
+	elite_config.poi_type = "elite"
+	elite_config.display_name = "Elite"
+	elite_config.color = Color("#e74c3c")  # 밝은 빨강
+	elite_config.size = 4.0
+	elite_config.priority = 60
+	elite_config.blink = true
+	elite_config.blink_speed = 3.0
+	elite_config.group_name = "elites"
+	elite_config.show_direction_indicator = true
+	poi_configs["elite"] = elite_config
+
 	# 보스 (미래 확장용)
 	var boss_config = MinimapPOIConfig.new()
 	boss_config.poi_type = "boss"

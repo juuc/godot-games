@@ -51,9 +51,29 @@ var is_elite: bool = false
 
 ## 난이도 스케일링 (SpawnManager에서 설정)
 var damage_multiplier: float = 1.0
+var health_multiplier: float = 1.0
 
 func set_damage_multiplier(mult: float) -> void:
 	damage_multiplier = mult
+
+func set_health_multiplier(mult: float) -> void:
+	health_multiplier = mult
+	if enemy_data:
+		current_health = enemy_data.max_health * mult
+
+## Elite 시각 효과 및 설정 적용
+func apply_elite_visuals(stat_mult: float = 3.0) -> void:
+	is_elite = true
+	add_to_group("elites")  # 미니맵 표시용
+
+	# 스탯 강화
+	set_health_multiplier(stat_mult)
+	set_damage_multiplier(stat_mult)
+
+	# 시각적 구분
+	if sprite:
+		sprite.scale *= 1.5  # 1.5배 크기
+		sprite.modulate = Color(1.0, 0.4, 0.4)  # 붉은 색조
 
 func _ready() -> void:
 	add_to_group("enemies")
