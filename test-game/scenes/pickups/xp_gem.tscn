@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://xp_gem_001"]
+[gd_scene load_steps=5 format=3 uid="uid://xp_gem_001"]
 
 [ext_resource type="Script" path="res://_shared/scripts/pickups/xp_gem.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://6vfcry26yv81" path="res://Assets/sprites/bullet.png" id="2_sprite"]
@@ -6,12 +6,17 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_gem"]
 radius = 6.0
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_gem"]
+blend_mode = 0
+
 [node name="XpGem" type="Area2D"]
+z_index = 1
 collision_layer = 16
 collision_mask = 2
 script = ExtResource("1_script")
 
 [node name="Sprite" type="Sprite2D" parent="."]
+material = SubResource("CanvasItemMaterial_gem")
 modulate = Color(0.3, 1, 0.5, 1)
 scale = Vector2(0.8, 0.8)
 texture = ExtResource("2_sprite")

@@ -42,6 +42,19 @@ var walk_frames_end: int = 5
 var attack_frames_start: int = 6
 var attack_frames_end: int = 9
 
+## Separation (적끼리 겹침 방지)
+var separation_radius: float = 20.0  ## 분리 감지 반경
+var separation_force: float = 80.0  ## 분리 힘
+
+## Elite 플래그 (거리 컬링 제외)
+var is_elite: bool = false
+
+## 난이도 스케일링 (SpawnManager에서 설정)
+var damage_multiplier: float = 1.0
+
+func set_damage_multiplier(mult: float) -> void:
+	damage_multiplier = mult
+
 func _ready() -> void:
 	add_to_group("enemies")
 
@@ -94,7 +107,34 @@ func _get_movement_velocity() -> Vector2:
 
 	var direction = (target.global_position - global_position).normalized()
 	var speed = enemy_data.move_speed if enemy_data else 50.0
-	return direction * speed
+	var chase_velocity = direction * speed
+
+	# 다른 적들과 분리
+	var separation = _get_separation_velocity()
+
+	return chase_velocity + separation
+
+## 주변 적들과의 분리 벡터 계산 (겹침 방지)
+func _get_separation_velocity() -> Vector2:
+	var separation = Vector2.ZERO
+	var nearby_count = 0
+
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy == self or not is_instance_valid(enemy):
+			continue
+
+		var to_self = global_position - enemy.global_position
+		var distance = to_self.length()
+
+		if distance < separation_radius and distance > 0:
+			# 거리가 가까울수록 강하게 밀어냄
+			separation += to_self.normalized() * (separation_radius - distance) / separation_radius
+			nearby_count += 1
+
+	if nearby_count > 0:
+		separation = separation.normalized() * separation_force
+
+	return separation
 
 ## 스프라이트 방향 및 걷기 애니메이션 업데이트
 func _update_sprite_direction() -> void:
@@ -163,7 +203,8 @@ func _deal_damage_to_target() -> void:
 
 	# 플레이어에게 데미지
 	if target.has_method("take_damage"):
-		var damage_amount = enemy_data.damage if enemy_data else 10.0
+		var base_damage = enemy_data.damage if enemy_data else 10.0
+		var damage_amount = base_damage * damage_multiplier
 		var knockback_dir = (target.global_position - global_position).normalized()
 		target.take_damage(damage_amount, knockback_dir)
 
@@ -234,6 +275,14 @@ func _die() -> void:
 ## XP 젬 씬 (프로젝트에서 설정)
 var xp_gem_scene: PackedScene = null
 
+## 체력 픽업 씬
+var health_pickup_scene: PackedScene = null
+
+## 체력 픽업 드롭 설정 (EnemyData에서 읽거나 기본값 사용)
+const DEFAULT_HEALTH_DROP_BASE_CHANCE: float = 0.05
+const DEFAULT_HEALTH_DROP_LOW_HP_CHANCE: float = 0.20
+const DEFAULT_HEALTH_DROP_LOW_HP_THRESHOLD: float = 0.3
+
 ## 드롭 아이템 스폰 (자식에서 오버라이드 가능)
 func _spawn_drops() -> void:
 	if not enemy_data:
@@ -242,6 +291,47 @@ func _spawn_drops() -> void:
 	# XP 젬 스폰
 	if enemy_data.xp_value > 0:
 		_spawn_xp_gem()
+
+	# 체력 픽업 스폰 (플레이어 체력에 따라 확률 조정)
+	_try_spawn_health_pickup()
+
+## 체력 픽업 드롭 시도
+func _try_spawn_health_pickup() -> void:
+	# EnemyData에서 드롭 설정 읽기 (없으면 기본값 사용)
+	var base_chance = DEFAULT_HEALTH_DROP_BASE_CHANCE
+	var low_hp_chance = DEFAULT_HEALTH_DROP_LOW_HP_CHANCE
+	var low_hp_threshold = DEFAULT_HEALTH_DROP_LOW_HP_THRESHOLD
+
+	if enemy_data:
+		base_chance = enemy_data.health_drop_base_chance
+		low_hp_chance = enemy_data.health_drop_low_hp_chance
+		low_hp_threshold = enemy_data.health_drop_low_hp_threshold
+
+	var drop_chance = base_chance
+
+	# 플레이어 체력이 낮으면 드롭 확률 증가
+	if target and is_instance_valid(target):
+		if "current_health" in target and "max_health" in target:
+			var health_ratio = target.current_health / target.max_health
+			if health_ratio <= low_hp_threshold:
+				drop_chance = low_hp_chance
+
+	if randf() <= drop_chance:
+		_spawn_health_pickup()
+
+## 체력 픽업 스폰
+func _spawn_health_pickup() -> void:
+	# 씬 로드 (캐시)
+	if not health_pickup_scene:
+		health_pickup_scene = load("res://scenes/pickups/health_pickup.tscn")
+
+	if not health_pickup_scene:
+		return
+
+	var pickup = health_pickup_scene.instantiate()
+	pickup.global_position = global_position
+
+	get_tree().current_scene.call_deferred("add_child", pickup)
 
 ## XP 젬 스폰
 func _spawn_xp_gem() -> void:
