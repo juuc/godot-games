@@ -278,10 +278,14 @@ var xp_gem_scene: PackedScene = null
 ## 체력 픽업 씬
 var health_pickup_scene: PackedScene = null
 
+## 보물상자 씬
+var treasure_chest_scene: PackedScene = null
+
 ## 체력 픽업 드롭 설정 (EnemyData에서 읽거나 기본값 사용)
 const DEFAULT_HEALTH_DROP_BASE_CHANCE: float = 0.05
 const DEFAULT_HEALTH_DROP_LOW_HP_CHANCE: float = 0.20
 const DEFAULT_HEALTH_DROP_LOW_HP_THRESHOLD: float = 0.3
+const DEFAULT_TREASURE_DROP_CHANCE: float = 0.01
 
 ## 드롭 아이템 스폰 (자식에서 오버라이드 가능)
 func _spawn_drops() -> void:
@@ -294,6 +298,9 @@ func _spawn_drops() -> void:
 
 	# 체력 픽업 스폰 (플레이어 체력에 따라 확률 조정)
 	_try_spawn_health_pickup()
+
+	# 보물상자 스폰 (낮은 확률)
+	_try_spawn_treasure_chest()
 
 ## 체력 픽업 드롭 시도
 func _try_spawn_health_pickup() -> void:
@@ -347,6 +354,30 @@ func _spawn_xp_gem() -> void:
 	gem.global_position = global_position
 
 	get_tree().current_scene.call_deferred("add_child", gem)
+
+## 보물상자 드롭 시도
+func _try_spawn_treasure_chest() -> void:
+	var chance = DEFAULT_TREASURE_DROP_CHANCE
+
+	if enemy_data and "treasure_drop_chance" in enemy_data:
+		chance = enemy_data.treasure_drop_chance
+
+	if randf() <= chance:
+		_spawn_treasure_chest()
+
+## 보물상자 스폰
+func _spawn_treasure_chest() -> void:
+	# 씬 로드 (캐시)
+	if not treasure_chest_scene:
+		treasure_chest_scene = load("res://scenes/pickups/treasure_chest.tscn")
+
+	if not treasure_chest_scene:
+		return
+
+	var chest = treasure_chest_scene.instantiate()
+	chest.global_position = global_position
+
+	get_tree().current_scene.call_deferred("add_child", chest)
 
 ## 타겟 설정
 func set_target(new_target: Node2D) -> void:

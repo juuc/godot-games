@@ -57,11 +57,13 @@ signal projectile_hit(projectile: Node2D, target: Node2D)  ## TODO: 원거리 �
 
 # --- Pickup Events ---
 @warning_ignore("unused_signal")
-signal pickup_spawned(pickup: Node2D, position: Vector2)  ## TODO: 보물상자 드롭 시
+signal pickup_spawned(pickup: Node2D, position: Vector2)
 @warning_ignore("unused_signal")
 signal pickup_collected(pickup: Node2D, collector: Node2D)
 @warning_ignore("unused_signal")
 signal xp_gained(amount: int, total: int)
+@warning_ignore("unused_signal")
+signal treasure_collected(chest: Node, player: Node)  ## 보물상자 획득
 
 # --- Skill Events ---
 @warning_ignore("unused_signal")

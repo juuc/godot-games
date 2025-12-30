@@ -23,6 +23,9 @@ extends Resource
 @export var health_drop_low_hp_chance: float = 0.20  ## 플레이어 저체력 시 (20%)
 @export var health_drop_low_hp_threshold: float = 0.3  ## 저체력 기준 (30% 이하)
 
+@export_group("Treasure Drop")
+@export var treasure_drop_chance: float = 0.01  ## 보물상자 드롭 확률 (1%)
+
 @export_group("Scaling")
 @export var health_scale: float = 1.0  ## 시간에 따른 체력 증가율
 @export var damage_scale: float = 1.0  ## 시간에 따른 데미지 증가율

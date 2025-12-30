@@ -50,6 +50,9 @@ func _on_ready() -> void:
 	# 스킬 시스템 초기화
 	_setup_skill_system()
 
+	# 보물상자 이벤트 구독
+	_setup_treasure_events()
+
 	# 모바일 컨트롤 찾기
 	await get_tree().process_frame
 	mobile_controls = get_tree().get_first_node_in_group("mobile_controls")
@@ -357,3 +360,35 @@ func _debug_print_stats() -> void:
 			stat_manager.get_damage(),
 			stat_manager.get_fire_rate()
 		])
+
+## 보물상자 이벤트 구독
+func _setup_treasure_events() -> void:
+	var event_bus_node = get_node_or_null("/root/EventBus")
+	if event_bus_node:
+		event_bus_node.treasure_collected.connect(_on_treasure_collected)
+
+## 보물상자 획득 시 (EventBus 경유)
+func _on_treasure_collected(_chest: Node, player: Node) -> void:
+	if player == self:
+		_show_treasure_selection()
+
+## 보물상자 획득 시 (직접 호출 - 폴백)
+func on_treasure_collected() -> void:
+	_show_treasure_selection()
+
+## 보물상자 선택 UI 표시
+func _show_treasure_selection() -> void:
+	var options: Array = []
+
+	# 무기 옵션
+	if weapon_manager:
+		options.append_array(weapon_manager.get_available_options())
+
+	# 패시브 옵션
+	if skill_manager:
+		options.append_array(skill_manager.get_passive_options())
+
+	if not options.is_empty() and skill_selection_ui:
+		options.shuffle()
+		var display_options = options.slice(0, mini(3, options.size()))
+		skill_selection_ui.show_selection(display_options)
