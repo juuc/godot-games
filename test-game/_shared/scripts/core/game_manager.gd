@@ -26,6 +26,13 @@ var kill_count: int = 0
 var total_xp: int = 0
 var current_wave: int = 0
 
+# --- Countdown Timer ---
+const CYCLE_DURATION: float = 600.0  ## 10분 = 600초
+var remaining_time: float = CYCLE_DURATION  ## 남은 시간
+var cycle_count: int = 0  ## 완료된 사이클 수
+
+# timer_updated, cycle_completed는 EventBus를 통해 발행
+
 # --- References ---
 var player: Node2D = null
 var current_level: Node2D = null
@@ -69,6 +76,7 @@ func _connect_events() -> void:
 func _process(delta: float) -> void:
 	if current_state == GameState.PLAYING:
 		game_time += delta
+		_update_countdown(delta)
 
 # --- Game Flow ---
 
@@ -132,6 +140,11 @@ func _reset_stats() -> void:
 	total_xp = 0
 	current_wave = 0
 	player = null
+	remaining_time = CYCLE_DURATION
+	cycle_count = 0
+	# 상태 초기화 (재시작 시 GAME_OVER에서 NONE으로)
+	current_state = GameState.NONE
+	previous_state = GameState.NONE
 
 ## 최종 통계 반환
 func get_final_stats() -> Dictionary:
@@ -149,11 +162,41 @@ func get_final_stats() -> Dictionary:
 		"wave": current_wave
 	}
 
-## 포맷된 시간 문자열 반환
+## 포맷된 시간 문자열 반환 (경과 시간)
 func get_formatted_time() -> String:
-	var minutes = int(game_time) / 60
-	var seconds = int(game_time) % 60
+	var total_seconds := int(game_time)
+	@warning_ignore("integer_division")
+	var minutes := total_seconds / 60
+	var seconds := total_seconds % 60
 	return "%d:%02d" % [minutes, seconds]
+
+## 포맷된 남은 시간 문자열 반환 (카운트다운)
+func get_formatted_remaining_time() -> String:
+	var total_seconds := int(remaining_time)
+	@warning_ignore("integer_division")
+	var minutes := total_seconds / 60
+	var seconds := total_seconds % 60
+	return "%d:%02d" % [minutes, seconds]
+
+## 카운트다운 업데이트
+func _update_countdown(delta: float) -> void:
+	remaining_time -= delta
+
+	if event_bus:
+		event_bus.timer_updated.emit(remaining_time, CYCLE_DURATION)
+
+	if remaining_time <= 0:
+		_complete_cycle()
+
+## 사이클 완료
+func _complete_cycle() -> void:
+	cycle_count += 1
+	remaining_time = CYCLE_DURATION  # 타이머 리셋
+
+	if event_bus:
+		event_bus.cycle_completed.emit(cycle_count)
+
+	print("[Cycle %d Complete] Starting next cycle!" % cycle_count)
 
 # --- State Management ---
 

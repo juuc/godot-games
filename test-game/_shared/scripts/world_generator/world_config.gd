@@ -73,3 +73,36 @@ extends Resource
 @export var safe_spawn_min: float = 0.0  ## 안전 스폰 최소 노이즈 값
 @export var safe_spawn_max: float = 0.45  ## 안전 스폰 최대 노이즈 값
 @export var spawn_search_radius: int = 100  ## 스폰 위치 검색 반경
+
+# --- Walkable Settings ---
+@export_group("Walkable")
+## 걸을 수 있는 레이어 (grass, sand 등)
+@export var walkable_layers: Array[int] = [1, 2]  ## layer_sand, layer_grass
+## 차단하는 레이어 (cliff, water 등) - walkable 레이어가 있어도 차단
+@export var blocking_layers: Array[int] = [3]  ## layer_cliff
+## water 레이어 (단독으로 있으면 차단, 다른 walkable과 겹치면 허용)
+@export var water_layer: int = 0
+
+## 특정 타일이 walkable인지 판단
+func is_tile_walkable(layers: Dictionary) -> bool:
+	# 차단 레이어가 있으면 걸을 수 없음
+	for blocking in blocking_layers:
+		if layers.has(blocking):
+			return false
+
+	# water만 있으면 걸을 수 없음 (다른 walkable 없이)
+	if layers.has(water_layer):
+		var has_walkable = false
+		for walkable in walkable_layers:
+			if layers.has(walkable):
+				has_walkable = true
+				break
+		if not has_walkable:
+			return false
+
+	# walkable 레이어가 있으면 걸을 수 있음
+	for walkable in walkable_layers:
+		if layers.has(walkable):
+			return true
+
+	return false

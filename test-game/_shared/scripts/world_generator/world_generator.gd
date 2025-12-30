@@ -106,7 +106,8 @@ func is_walkable(x: int, y: int) -> bool:
 	if not has_data:
 		return false
 
-	return layers.has(config.layer_grass) or layers.has(config.layer_sand) or layers.has(config.layer_cliff)
+	# WorldConfig에서 walkable 판단 위임
+	return config.is_tile_walkable(layers)
 
 ## 청크 데이터 생성 (백그라운드 스레드에서 호출 가능)
 func generate_chunk_data(chunk: Vector2i) -> Dictionary:

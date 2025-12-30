@@ -7,29 +7,58 @@ extends Node
 
 signal enemy_spawned(enemy: EnemyBase)
 signal enemy_died(enemy: EnemyBase, position: Vector2)
+signal wave_changed(wave: int, health_mult: float, damage_mult: float)
 
 @export_group("Spawn Settings")
 @export var enemy_data_list: Array[EnemyData]  ## 스폰할 적 종류
-@export var spawn_interval: float = 2.0  ## 스폰 간격 (초)
-@export var enemies_per_spawn: int = 3  ## 한번에 스폰할 적 수
-@export var max_enemies: int = 50  ## 최대 동시 적 수
+@export var spawn_interval: float = 1.5  ## 스폰 간격 (초)
+@export var enemies_per_spawn: int = 5  ## 한번에 스폰할 적 수
+@export var max_enemies: int = 80  ## 최대 동시 적 수
+
+@export_group("Difficulty Scaling")
+@export var enable_difficulty_scaling: bool = true  ## 시간 기반 난이도 증가
+@export var difficulty_interval: float = 30.0  ## 난이도 증가 간격 (초)
+@export var min_spawn_interval: float = 0.5  ## 최소 스폰 간격
+@export var max_enemies_per_spawn: int = 10  ## 최대 동시 스폰 수
+@export var health_scale_per_wave: float = 0.1  ## 웨이브당 체력 증가율 (10%)
+@export var damage_scale_per_wave: float = 0.05  ## 웨이브당 데미지 증가율 (5%)
 
 @export_group("Spawn Area")
-@export var min_spawn_distance: float = 300.0  ## 최소 스폰 거리
-@export var max_spawn_distance: float = 400.0  ## 최대 스폰 거리
+@export var min_spawn_distance: float = 400.0  ## 최소 스폰 거리
+@export var max_spawn_distance: float = 550.0  ## 최대 스폰 거리
+@export var cull_distance: float = 700.0  ## 이 거리 이상 적은 컬링 대상
+@export var max_spawn_attempts: int = 8  ## 스폰 위치 찾기 최대 시도
 
 @export_group("References")
 @export var player: Node2D
+@export var spawn_container: Node  ## 적이 추가될 컨테이너 (미설정 시 부모 노드)
 
 var spawn_timer: float = 0.0
-var current_enemy_count: int = 0
+var current_enemy_count: int = 0  ## 일반 적 수
+var current_elite_count: int = 0  ## 엘리트 적 수 (별도 관리)
 var game_time: float = 0.0  ## 게임 시간 (난이도 스케일링용)
 var is_spawning_enabled: bool = true
+
+## Wave System
+var current_wave: int = 1
+var last_wave_time: float = 0.0  ## 마지막 웨이브 시작 시간
+
+## Base values (초기값 저장)
+var _base_spawn_interval: float
+var _base_enemies_per_spawn: int
+
+## Current scaled values
+var current_health_multiplier: float = 1.0
+var current_damage_multiplier: float = 1.0
 
 ## EventBus 참조
 var event_bus: Node = null
 
 func _ready() -> void:
+	# 초기값 저장
+	_base_spawn_interval = spawn_interval
+	_base_enemies_per_spawn = enemies_per_spawn
+
 	# EventBus 참조
 	event_bus = get_node_or_null("/root/EventBus")
 
@@ -56,7 +85,57 @@ func _on_game_over(_stats: Dictionary) -> void:
 func _on_game_restarted() -> void:
 	is_spawning_enabled = true
 	current_enemy_count = 0
+	current_elite_count = 0
 	spawn_timer = 0.0
+	game_time = 0.0
+
+	# 웨이브 초기화
+	current_wave = 1
+	last_wave_time = 0.0
+	current_health_multiplier = 1.0
+	current_damage_multiplier = 1.0
+
+	# 스폰 설정 초기화
+	spawn_interval = _base_spawn_interval
+	enemies_per_spawn = _base_enemies_per_spawn
+
+## 스폰 컨테이너 반환 (명시적 설정 > 부모 노드 폴백)
+func _get_spawn_container() -> Node:
+	if spawn_container:
+		return spawn_container
+	return get_parent()
+
+## 먼 적 컬링 (max_enemies 도달 시 호출)
+## 가장 먼 non-elite 적부터 삭제
+func _cull_distant_enemies(count_to_cull: int) -> int:
+	if not player:
+		return 0
+
+	# non-elite 적들을 거리순으로 정렬
+	var enemies_with_distance: Array = []
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy):
+			continue
+		if enemy.is_elite:
+			continue  # elite는 컬링 대상에서 제외
+
+		var dist = enemy.global_position.distance_to(player.global_position)
+		if dist >= cull_distance:
+			enemies_with_distance.append({"enemy": enemy, "distance": dist})
+
+	# 거리 내림차순 정렬 (가장 먼 적부터)
+	enemies_with_distance.sort_custom(func(a, b): return a.distance > b.distance)
+
+	# 컬링 실행
+	var culled = 0
+	for i in range(min(count_to_cull, enemies_with_distance.size())):
+		var enemy = enemies_with_distance[i].enemy
+		if is_instance_valid(enemy):
+			enemy.queue_free()
+			culled += 1
+
+	current_enemy_count -= culled
+	return culled
 
 func _process(delta: float) -> void:
 	if not player or not is_spawning_enabled:
@@ -65,15 +144,59 @@ func _process(delta: float) -> void:
 	game_time += delta
 	spawn_timer += delta
 
+	# 난이도 스케일링 체크
+	if enable_difficulty_scaling:
+		_check_wave_advance()
+
 	if spawn_timer >= spawn_interval:
 		spawn_timer = 0.0
-		_spawn_wave()
+		_spawn_enemies()
 
-func _spawn_wave() -> void:
+## 웨이브 진행 체크 및 난이도 증가
+func _check_wave_advance() -> void:
+	var time_since_last_wave = game_time - last_wave_time
+	if time_since_last_wave >= difficulty_interval:
+		_advance_wave()
+
+## 웨이브 진행 (난이도 증가)
+func _advance_wave() -> void:
+	current_wave += 1
+	last_wave_time = game_time
+
+	# 스폰 속도 증가 (간격 감소)
+	spawn_interval = maxf(min_spawn_interval, _base_spawn_interval * pow(0.9, current_wave - 1))
+
+	# 동시 스폰 수 증가
+	enemies_per_spawn = mini(max_enemies_per_spawn, _base_enemies_per_spawn + (current_wave - 1))
+
+	# 적 스탯 스케일링
+	current_health_multiplier = 1.0 + (current_wave - 1) * health_scale_per_wave
+	current_damage_multiplier = 1.0 + (current_wave - 1) * damage_scale_per_wave
+
+	# 시그널 발행
+	wave_changed.emit(current_wave, current_health_multiplier, current_damage_multiplier)
+
+	# EventBus로도 발행
+	if event_bus:
+		event_bus.wave_started.emit(current_wave)
+
+	print("[Wave %d] Interval: %.2f, Spawn: %d, HP: x%.2f, DMG: x%.2f" % [
+		current_wave, spawn_interval, enemies_per_spawn,
+		current_health_multiplier, current_damage_multiplier
+	])
+
+func _spawn_enemies() -> void:
 	if enemy_data_list.is_empty():
 		return
 
-	var to_spawn = min(enemies_per_spawn, max_enemies - current_enemy_count)
+	var available_slots = max_enemies - current_enemy_count
+	var to_spawn = min(enemies_per_spawn, available_slots)
+
+	# 슬롯 부족 시 먼 적 컬링 시도
+	if to_spawn < enemies_per_spawn:
+		var need_to_cull = enemies_per_spawn - to_spawn
+		var culled = _cull_distant_enemies(need_to_cull)
+		to_spawn += culled
 
 	for i in range(to_spawn):
 		var enemy_data = enemy_data_list[randi() % enemy_data_list.size()]
@@ -88,6 +211,24 @@ func _spawn_enemy_at_angle(data: EnemyData, angle: float) -> void:
 	if current_enemy_count >= max_enemies:
 		return
 
+	# walkable 위치 찾기 (여러 번 시도)
+	var spawn_pos := Vector2.ZERO
+	var found_valid_pos := false
+
+	for _attempt in range(max_spawn_attempts):
+		var test_angle = angle + randf_range(-0.5, 0.5)  # 약간의 각도 변화
+		var distance = randf_range(min_spawn_distance, max_spawn_distance)
+		var pos = player.global_position + Vector2.RIGHT.rotated(test_angle) * distance
+
+		if _is_position_walkable(pos):
+			spawn_pos = pos
+			found_valid_pos = true
+			break
+
+	# walkable 위치를 못 찾으면 스폰 포기
+	if not found_valid_pos:
+		return
+
 	var enemy = data.scene.instantiate() as EnemyBase
 	if not enemy:
 		return
@@ -98,15 +239,17 @@ func _spawn_enemy_at_angle(data: EnemyData, angle: float) -> void:
 	# 시그널 연결
 	enemy.died.connect(_on_enemy_died)
 
-	# 먼저 씬에 추가 (global_position이 제대로 동작하려면 트리에 있어야 함)
-	get_tree().current_scene.add_child(enemy)
+	# 스폰 컨테이너에 추가
+	_get_spawn_container().add_child(enemy)
 
-	# 그 다음 위치 설정
-	var distance = randf_range(min_spawn_distance, max_spawn_distance)
-	enemy.global_position = player.global_position + Vector2.RIGHT.rotated(angle) * distance
+	# 위치 설정
+	enemy.global_position = spawn_pos
 
 	# 타겟 설정
 	enemy.set_target(player)
+
+	# 난이도 스케일링 적용
+	_apply_difficulty_scaling(enemy)
 
 	current_enemy_count += 1
 	enemy_spawned.emit(enemy)
@@ -133,8 +276,12 @@ func _spawn_enemy(data: EnemyData) -> void:
 	# 시그널 연결
 	enemy.died.connect(_on_enemy_died)
 
-	# 씬에 추가
-	get_tree().current_scene.add_child(enemy)
+	# 스폰 컨테이너에 추가
+	_get_spawn_container().add_child(enemy)
+
+	# 난이도 스케일링 적용
+	_apply_difficulty_scaling(enemy)
+
 	current_enemy_count += 1
 
 	enemy_spawned.emit(enemy)
@@ -143,16 +290,53 @@ func _spawn_enemy(data: EnemyData) -> void:
 	if event_bus:
 		event_bus.enemy_spawned.emit(enemy)
 
+## 난이도 스케일링 적용
+func _apply_difficulty_scaling(enemy: EnemyBase) -> void:
+	if not enable_difficulty_scaling or current_wave <= 1:
+		return
+
+	# 체력 스케일링
+	enemy.current_health *= current_health_multiplier
+
+	# 데미지는 EnemyBase에서 enemy_data.damage를 직접 참조하므로
+	# 별도의 multiplier 변수를 적에게 전달
+	if enemy.has_method("set_damage_multiplier"):
+		enemy.set_damage_multiplier(current_damage_multiplier)
+	else:
+		# 폴백: 커스텀 프로퍼티로 저장
+		enemy.set_meta("damage_multiplier", current_damage_multiplier)
+
 func _get_spawn_position() -> Vector2:
 	if not player:
 		return Vector2.ZERO
 
-	var angle = randf() * TAU
-	var distance = randf_range(min_spawn_distance, max_spawn_distance)
-	return player.global_position + Vector2.RIGHT.rotated(angle) * distance
+	# 여러 번 시도해서 walkable 위치 찾기
+	for _attempt in range(max_spawn_attempts):
+		var angle = randf() * TAU
+		var distance = randf_range(min_spawn_distance, max_spawn_distance)
+		var pos = player.global_position + Vector2.RIGHT.rotated(angle) * distance
+
+		if _is_position_walkable(pos):
+			return pos
+
+	# 실패 시 기본 위치 반환 (스폰 포기보다는 낫다)
+	var fallback_angle = randf() * TAU
+	var fallback_distance = randf_range(min_spawn_distance, max_spawn_distance)
+	return player.global_position + Vector2.RIGHT.rotated(fallback_angle) * fallback_distance
+
+## 위치가 walkable한지 체크 (레벨 노드에 위임)
+func _is_position_walkable(pos: Vector2) -> bool:
+	var level_node = get_tree().get_first_node_in_group("level")
+	if level_node and level_node.has_method("is_tile_walkable"):
+		return level_node.is_tile_walkable(pos)
+	# 레벨 노드가 없으면 기본적으로 허용
+	return true
 
 func _on_enemy_died(enemy: EnemyBase, pos: Vector2) -> void:
-	current_enemy_count -= 1
+	if enemy.is_elite:
+		current_elite_count -= 1
+	else:
+		current_enemy_count -= 1
 	enemy_died.emit(enemy, pos)
 
 	# EventBus로도 발행 (EnemyBase에서 이미 발행하지만, 로컬 시그널 구독자용)
@@ -167,6 +351,58 @@ func clear_all_enemies() -> void:
 	for enemy in enemies:
 		enemy.queue_free()
 	current_enemy_count = 0
+	current_elite_count = 0
+
+## 엘리트 적 스폰 (max_enemies 제한 무시)
+func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBase:
+	if not data or not data.scene:
+		return null
+
+	# 위치 결정 (walkable 체크 포함)
+	var final_pos := spawn_pos
+	if spawn_pos == Vector2.ZERO and player:
+		var found_valid_pos := false
+		for _attempt in range(max_spawn_attempts):
+			var angle = randf() * TAU
+			var distance = randf_range(min_spawn_distance, max_spawn_distance)
+			var pos = player.global_position + Vector2.RIGHT.rotated(angle) * distance
+
+			if _is_position_walkable(pos):
+				final_pos = pos
+				found_valid_pos = true
+				break
+
+		# 위치를 못 찾으면 스폰 포기
+		if not found_valid_pos:
+			return null
+
+	var enemy = data.scene.instantiate() as EnemyBase
+	if not enemy:
+		return null
+
+	enemy.enemy_data = data
+	enemy.is_elite = true
+
+	enemy.died.connect(_on_enemy_died)
+
+	_get_spawn_container().add_child(enemy)
+
+	# 위치 설정
+	enemy.global_position = final_pos
+
+	if player:
+		enemy.set_target(player)
+
+	# 엘리트에도 난이도 스케일링 적용
+	_apply_difficulty_scaling(enemy)
+
+	current_elite_count += 1
+	enemy_spawned.emit(enemy)
+
+	if event_bus:
+		event_bus.enemy_spawned.emit(enemy)
+
+	return enemy
 
 ## 난이도에 따른 스폰 간격 조정
 func set_difficulty(difficulty_mult: float) -> void:

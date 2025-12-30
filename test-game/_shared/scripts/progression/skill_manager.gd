@@ -3,10 +3,14 @@ extends RefCounted
 
 ## 스킬 관리자
 ## 획득한 스킬, 레벨, 선택 로직 담당
+## 패시브 스킬 슬롯 제한 지원
 
 signal skill_acquired(skill, level: int)
 signal skill_upgraded(skill, new_level: int)
 signal selection_required(options: Array)
+
+## 최대 패시브 스킬 슬롯 수
+const MAX_PASSIVE_SLOTS: int = 3
 
 ## 사용 가능한 모든 스킬 풀
 var available_skills: Array = []
@@ -90,3 +94,50 @@ func load_state(state: Dictionary) -> void:
 ## 리셋
 func reset() -> void:
 	acquired_skills.clear()
+
+## 현재 패시브 스킬 수 반환
+func get_passive_count() -> int:
+	var count = 0
+	for skill_id in acquired_skills:
+		var skill = _get_skill_by_id(skill_id)
+		if skill and skill.skill_type == 0:  # PASSIVE = 0
+			count += 1
+	return count
+
+## 새 패시브 스킬 획득 가능 여부
+func can_acquire_passive() -> bool:
+	return get_passive_count() < MAX_PASSIVE_SLOTS
+
+## ID로 스킬 찾기
+func _get_skill_by_id(skill_id: String):
+	for skill in available_skills:
+		if skill.id == skill_id:
+			return skill
+	return null
+
+## 패시브 스킬만 선택지로 반환 (통합 선택 UI용)
+func get_passive_options() -> Array:
+	var options: Array = []
+
+	for skill in available_skills:
+		# PASSIVE 타입만 (skill_type == 0)
+		if skill.skill_type != 0:
+			continue
+
+		var current_level = acquired_skills.get(skill.id, 0)
+
+		# 최대 레벨이면 스킵
+		if current_level >= skill.max_level:
+			continue
+
+		# 새 스킬인데 슬롯이 없으면 스킵
+		if current_level == 0 and not can_acquire_passive():
+			continue
+
+		options.append({
+			"type": "passive",
+			"data": skill,
+			"level": current_level
+		})
+
+	return options

@@ -233,6 +233,29 @@ func _level_up() -> void:
 
 	_on_level_up()
 
+## 레벨업 무적 효과 (반짝임 + 2초 무적)
+func _start_levelup_invincibility() -> void:
+	is_invincible = true
+
+	var duration = 2.0
+	var blink_interval = 0.1
+	var blink_count = int(duration / blink_interval)
+
+	for i in range(blink_count):
+		if not is_instance_valid(self):
+			return
+		if player_sprite:
+			# 황금색으로 반짝임
+			player_sprite.modulate = Color(1.0, 0.9, 0.3, 1.0)
+		await get_tree().create_timer(blink_interval / 2).timeout
+		if not is_instance_valid(self):
+			return
+		if player_sprite:
+			player_sprite.modulate = Color.WHITE
+		await get_tree().create_timer(blink_interval / 2).timeout
+
+	is_invincible = false
+
 ## 레벨업 시 호출 (자식에서 오버라이드)
 func _on_level_up() -> void:
 	pass

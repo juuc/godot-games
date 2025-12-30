@@ -5,7 +5,8 @@ extends CanvasLayer
 ## 게임별로 스타일링을 위해 상속하여 사용
 
 signal skill_selected(skill)
-signal selection_cancelled()
+@warning_ignore("unused_signal")
+signal selection_cancelled()  ## TODO: 취소 기능 구현 시 사용
 
 ## 스킬 매니저 참조
 var skill_manager
@@ -55,14 +56,18 @@ func _on_skill_selected(index: int) -> void:
 	if index < 0 or index >= current_options.size():
 		return
 
-	var selected_skill = current_options[index]
+	var selected_option = current_options[index]
 
-	# 스킬 획득
-	if skill_manager:
-		skill_manager.acquire_skill(selected_skill)
-
-	# 시그널 발생
-	skill_selected.emit(selected_skill)
+	# 통합 옵션 형식 체크 {type: "weapon"|"passive", data, level}
+	# 시그널 핸들러(player)가 타입별 처리를 담당
+	if selected_option is Dictionary and selected_option.has("type"):
+		# 시그널만 발생 - player._on_skill_selected에서 처리
+		skill_selected.emit(selected_option)
+	else:
+		# 기존 스킬 형식 (하위 호환)
+		if skill_manager:
+			skill_manager.acquire_skill(selected_option)
+		skill_selected.emit(selected_option)
 
 	# UI 숨김 및 게임 재개
 	_close_selection()

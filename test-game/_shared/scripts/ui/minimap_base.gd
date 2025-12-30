@@ -165,8 +165,10 @@ func _update_terrain() -> void:
 func _get_terrain_color(world_x: int, world_y: int) -> Color:
 	if world_generator and world_generator.has_method("get_biome_at"):
 		# 월드 좌표(픽셀)를 타일 좌표로 변환
-		var tile_x = int(world_x / tile_size)
-		var tile_y = int(world_y / tile_size)
+		@warning_ignore("integer_division")
+		var tile_x := world_x / tile_size
+		@warning_ignore("integer_division")
+		var tile_y := world_y / tile_size
 		var biome = world_generator.get_biome_at(tile_x, tile_y)
 
 		# 레이어 우선순위에 따라 색상 결정
@@ -366,9 +368,9 @@ func _minimap_to_world(minimap_pos: Vector2) -> Vector2:
 	return player.global_position + offset * inv_scale
 
 ## 특정 POI 타입 표시/숨김
-func set_poi_visible(poi_type: String, is_visible: bool) -> void:
+func set_poi_visible(poi_type: String, visible_state: bool) -> void:
 	if poi_configs.has(poi_type):
-		poi_configs[poi_type].show_on_minimap = is_visible
+		poi_configs[poi_type].show_on_minimap = visible_state
 
 ## 특정 POI 타입 색상 변경
 func set_poi_color(poi_type: String, color: Color) -> void:
