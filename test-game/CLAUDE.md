@@ -1,211 +1,151 @@
 # test-game - Claude Code Context
 
-> **공유 모듈 문서**: [../docs/shared-modules.md](../docs/shared-modules.md)
+Vampire Survivors 스타일 2D 탑다운 슈터 프로젝트입니다.
 
-## Project Overview
+## 문서
 
-2D 탑다운 슈터 with 무한 절차적 월드 생성. RapidWorldGen을 기반으로 하며, 모바일/PC 크로스 플랫폼 지원.
+| 문서 | 설명 |
+|------|------|
+| [TODO.md](TODO.md) | 작업 목록, 진행 상황 |
+| [../docs/architecture.md](../docs/architecture.md) | 시스템 아키텍처, 설계 패턴 |
+| [../docs/shared-modules.md](../docs/shared-modules.md) | 공유 모듈 API 레퍼런스 |
+
+---
 
 ## Tech Stack
 
 - **Engine**: Godot 4.5+
 - **Language**: GDScript
-- **Target**: PC, iOS, Android
+- **Renderer**: GL Compatibility
 
-## Architecture
+---
 
-### Core System (Autoload)
+## Quick Reference
 
-게임 상태 관리와 시스템 간 통신을 위한 싱글톤:
-
-```
-_shared/scripts/core/
-├── event_bus.gd     # 전역 이벤트 버스 (느슨한 결합)
-├── game_manager.gd  # 게임 상태 (시간, 킬, XP, game over 등)
-└── audio_manager.gd # 중앙 오디오 관리 (SFX 풀, 음악)
-```
-
-**EventBus 주요 시그널**:
-- `game_over(stats)`, `game_restarted`
-- `player_died`, `player_level_up`, `player_damaged`, `player_spawned`
-- `enemy_killed`, `enemy_spawned`
-- `pickup_collected`, `xp_gained`
-
-**GameManager 주요 기능**:
-- 게임 상태 관리 (PLAYING, PAUSED, GAME_OVER)
-- 통계 추적 (game_time, kill_count, total_xp)
-- `trigger_game_over()`, `restart_game()`
-
-### Weapon System
-
-데이터 기반 무기 시스템:
+### 씬 구조 (EntityLayer 패턴)
 
 ```
-_shared/scripts/weapons/
-├── weapon_data.gd   # WeaponData 리소스 (데미지, 발사속도 등)
-└── weapon_base.gd   # 발사 로직, modifier 적용
-
-resources/weapons/
-├── default_pistol.tres  # 기본 권총
-├── shotgun.tres         # 산탄총 (5발사체)
-├── machinegun.tres      # 기관총 (빠른 연사)
-└── sniper.tres          # 저격총 (관통)
+World (Node2D)
+├── TileMap
+├── EntityLayer (CanvasLayer)  ← Player, SpawnManager 여기에
+│   ├── Player
+│   └── SpawnManager
+├── HUD
+├── MinimapUI
+└── GameOver
 ```
 
-### Stat System
+### Core Autoloads
 
-중앙 집중식 스탯 계산:
-
-```
-_shared/scripts/progression/
-├── stat_modifier.gd  # FLAT, PERCENT, MULTIPLY 모드
-└── stat_manager.gd   # 스탯 계산, 캐싱
-```
-
-**사용 예시**:
-```gdscript
-# 스킬에서 자동 modifier 생성
-var modifier = skill.create_modifier(level)
-stat_manager.add_modifier(modifier)
-
-# 계산된 스탯 조회
-var speed = stat_manager.get_move_speed()
+```ini
+# project.godot
+[autoload]
+EventBus="*res://_shared/scripts/core/event_bus.gd"
+GameManager="*res://_shared/scripts/core/game_manager.gd"
 ```
 
-### Shared Module (`_shared/scripts/world_generator/`)
+### Collision Layers
 
-모노레포에서 재사용 가능한 월드 생성 모듈:
+| Layer | Value | Name |
+|-------|-------|------|
+| 1 | 1 | landscape |
+| 2 | 2 | players |
+| 3 | 4 | bullets |
+| 4 | 8 | enemies |
+| 5 | 16 | pickups |
 
-```
-_shared/scripts/world_generator/
-├── world_config.gd    # WorldConfig Resource - 모든 설정 외부화
-└── world_generator.gd # WorldGenerator 클래스 - 노이즈, 바이옴, 스폰 로직
-```
+---
 
-**WorldConfig 주요 설정**:
-- `noise_frequency`: 0.001 (낮을수록 큰 대륙)
-- `chunk_size`: 16 (타일 단위)
-- `render_distance`: 10, `generation_distance`: 15 (청크 단위)
-- Biome thresholds: water < 0.0, sand 0.0~0.15, grass 0.15~0.55, cliff > 0.535
+## Key Files
 
-### Core Files
+### 게임 로직
 
-| File | Purpose |
-|------|---------|
-| `scenes/level.gd` | 월드 관리, 청크 스케줄링, TileMap 렌더링, 오토타일링 솔버 |
-| `scenes/player.gd` | 캐릭터 이동, 방향 기반 발사, 애니메이션 |
-| `scenes/camera_2d.gd` | 줌 인/아웃 (마우스휠, 버튼) |
-| `scenes/virtual_joystick.gd` | 모바일 터치 조이스틱 |
-| `scenes/mobile_controls.gd` | 조이스틱 + 발사 버튼 통합 |
-| `scenes/zoom_ui.gd` | +/- 줌 버튼 UI |
-| `scenes/bullet.gd` | RigidBody2D 탄환 |
-| `resources/world_config.tres` | WorldConfig 리소스 인스턴스 |
+| 파일 | 역할 |
+|------|------|
+| `scenes/level.gd` | 월드 관리, 청크, TileMap |
+| `scenes/player.gd` | 이동, 발사, 레벨업 |
+| `scenes/ui/hud.gd` | 체력바, XP바, 타이머 |
+| `scenes/ui/game_over.gd` | 게임오버 화면 |
 
-## Controls
+### 리소스
 
-| Platform | Move | Fire | Zoom |
-|----------|------|------|------|
-| PC | WASD | 자동 (바라보는 방향) | Mouse Wheel |
-| Mobile | Virtual Joystick | Fire Button | +/- Buttons |
+| 경로 | 내용 |
+|------|------|
+| `resources/weapons/` | 무기 데이터 (.tres) |
+| `resources/enemies/` | 적 데이터 (.tres) |
+| `resources/skills/` | 스킬 데이터 (.tres) |
+| `resources/world_config.tres` | 월드 생성 설정 |
 
-## Key Features
+### 공유 스크립트 (주요)
 
-### 1. 무한 월드 생성
-- FastNoiseLite (Simplex + FBM)
-- WorkerThreadPool 멀티스레드 청크 생성
-- 커스텀 오토타일링 솔버 (fuzzy matching)
-- 4개 레이어: Water → Sand → Grass → Cliff
+| 경로 | Class | 역할 |
+|------|-------|------|
+| `_shared/scripts/core/event_bus.gd` | - | 이벤트 허브 |
+| `_shared/scripts/core/game_manager.gd` | - | 상태/통계 |
+| `_shared/scripts/enemies/spawn_manager.gd` | SpawnManager | 스폰, 컬링 |
+| `_shared/scripts/weapons/weapon_manager.gd` | WeaponManager | 다중 무기 |
+| `_shared/scripts/progression/stat_manager.gd` | StatManager | 스탯 계산 |
 
-### 2. 플레이어 시스템
-- 8방향 스무스 이동 (키보드 + 조이스틱)
-- 바라보는 방향으로 자동 조준/발사
-- `direction_smoothing`: 부드러운 방향 전환 (0.15)
-- 지형 충돌 체크 (물 위 이동 불가)
+---
 
-### 3. 모바일 지원
-- CanvasLayer 기반 UI (카메라 독립)
-- 가상 조이스틱 (데드존 0.2)
-- 발사 버튼 (Input.action_press 시뮬레이션)
-
-### 4. 카메라
-- Pixel snap 활성화 (크리스프한 2D)
-- position_smoothing 비활성화 (뱀서라이크 스타일)
-- Zoom 범위: 1.5 ~ 5.0
-
-## Running the Project
-
-```bash
-# Godot 에디터에서 열기
-godot --path /path/to/test-game
-
-# 또는 MCP로 실행
-# mcp__godot-mcp__run_project with projectPath
-```
-
-**단축키**:
-- `F5` (또는 `Fn+F5` on Mac): 게임 실행
-- `Tab`: 디버그 노이즈 레이어 토글
-
-## Project Structure
+## 프로젝트 구조
 
 ```
 test-game/
-├── _shared/scripts/world_generator/  # 공유 모듈 (복사본)
-├── Assets/
-│   ├── Paradise/                     # 타일셋, 캐릭터 스프라이트
-│   ├── Audio/                        # 사운드
-│   └── sprites/                      # 탄환 등
-├── resources/
-│   └── world_config.tres             # 월드 설정 리소스
-├── scenes/
-│   ├── level.tscn/gd                 # 메인 씬
-│   ├── player.tscn/gd                # 플레이어
-│   ├── bullet.tscn/gd                # 탄환
-│   ├── camera_2d.gd                  # 카메라 스크립트
-│   ├── zoom_ui.tscn/gd               # 줌 UI
-│   ├── virtual_joystick.tscn/gd      # 조이스틱
-│   └── mobile_controls.tscn/gd       # 모바일 컨트롤
+├── _shared/scripts/        # 공유 모듈
+├── Assets/                 # 에셋 (타일셋, 스프라이트, 사운드)
+├── resources/              # 게임 데이터 (.tres)
+├── scenes/                 # 씬 파일 (.tscn, .gd)
 └── project.godot
 ```
 
-## TileMap Configuration
+---
 
-5개 레이어 (level.tscn의 TileMap):
-- Layer 0: water
-- Layer 1: sand
-- Layer 2: grass
-- Layer 3: cliff
-- Layer 4: environment (나무 등)
+## 실행
 
-TileSet 소스: `Assets/Paradise/FOR_TUTORIAL/tilemap1.png`
-- Terrain autotiling with 8-direction peering bits
-- 4 terrains: water(0), sand(1), grass(2), cliff(3)
+```bash
+# Godot MCP로 실행
+mcp__godot-mcp__run_project projectPath="/Users/juucheol/games/godot-games/test-game"
 
-## Important Notes
+# Godot CLI
+godot --path /path/to/test-game
+```
 
-### Godot 특이사항
-- `res://` 경로는 프로젝트 폴더 내부만 접근 가능
-- 심볼릭 링크 미지원 → 공유 스크립트는 복사 필요
-- `class_name`은 에디터에서 프로젝트 열어야 등록됨
+---
 
-### 성능 최적화
-- `render_budget`: 프레임당 렌더링할 청크 수 (기본 2)
-- 청크 언로드: render_distance 밖 청크 자동 제거
-- Mutex 사용: 멀티스레드 데이터 접근 보호
+## 주의사항
 
-### 커스터마이징
-새 타일셋 사용 시 `resources/world_config.tres`에서:
-1. `layer_*`, `terrain_*` ID 수정
-2. `tree_palm_1`, `tree_palm_2`, `tree_forest` 좌표 수정
-3. Biome threshold 조정
+### EntityLayer 필수
 
-## Git Info
+Player와 SpawnManager는 반드시 EntityLayer 안에 배치:
 
-- Remote: `git@github.com-personal:juuc/godot-games.git`
-- Branch: `main`
+```
+[node name="EntityLayer" type="CanvasLayer"]
+layer = 1
+follow_viewport_enabled = true
+```
 
-## Credits
+이유: TileMap 색상이 캐릭터/적 스프라이트에 영향주는 문제 방지
 
-- [RapidWorldGen](https://github.com/TNTGuerrilla/RapidWorldGen) - 원본 월드 생성 레퍼런스
-- [Paradise Asset Pack](https://jackie-codes.itch.io/paradise-asset-pack) - 타일셋
-- [Godot4Tilemaps](https://github.com/...) - TileSet 설정 레퍼런스
+### 스탯 수정자 모드
+
+| 모드 | 계산 | 예시 |
+|------|------|------|
+| FLAT | base + value | 10 + 5 = 15 |
+| PERCENT | base * (1 + value) | 10 * 1.2 = 12 |
+| MULTIPLY | base * value | 10 * 0.9 = 9 |
+
+### 이벤트 사용
+
+```gdscript
+# 발행
+var event_bus = get_node_or_null("/root/EventBus")
+if event_bus:
+    event_bus.enemy_killed.emit(self, pos, xp)
+
+# 구독
+func _ready():
+    var event_bus = get_node_or_null("/root/EventBus")
+    if event_bus:
+        event_bus.enemy_killed.connect(_on_enemy_killed)
+```
