@@ -56,8 +56,10 @@ func _update_stats_display() -> void:
 	if final_stats.has("kills"):
 		text += "처치: %d\n" % final_stats.kills
 	if final_stats.has("time"):
-		var minutes = int(final_stats.time) / 60
-		var seconds = int(final_stats.time) % 60
+		var total_seconds := int(final_stats.time)
+		@warning_ignore("integer_division")
+		var minutes := total_seconds / 60
+		var seconds := total_seconds % 60
 		text += "생존: %d:%02d\n" % [minutes, seconds]
 	if final_stats.has("xp"):
 		text += "획득 XP: %d" % final_stats.xp

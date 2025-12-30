@@ -9,7 +9,7 @@ script = ExtResource("1_script")
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 80.0
+offset_bottom = 160.0
 grow_horizontal = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
@@ -43,3 +43,48 @@ layout_mode = 2
 max_value = 10.0
 value = 0.0
 show_percentage = false
+
+[node name="SlotsContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 4
+
+[node name="WeaponLabel" type="Label" parent="MarginContainer/VBoxContainer/SlotsContainer"]
+layout_mode = 2
+text = "WEAPONS"
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(1, 0.6, 0.2, 1)
+
+[node name="WeaponSlots" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SlotsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PassiveLabel" type="Label" parent="MarginContainer/VBoxContainer/SlotsContainer"]
+layout_mode = 2
+text = "PASSIVES"
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.3, 0.6, 1, 1)
+
+[node name="PassiveSlots" type="HBoxContainer" parent="MarginContainer/VBoxContainer/SlotsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TimerContainer" type="MarginContainer" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -60.0
+offset_right = 60.0
+offset_bottom = 50.0
+grow_horizontal = 2
+theme_override_constants/margin_top = 15
+
+[node name="TimerLabel" type="Label" parent="TimerContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "10:00"
+theme_override_font_sizes/font_size = 32
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2

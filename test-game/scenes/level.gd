@@ -34,6 +34,12 @@ var tile_rules: Dictionary = {}
 var game_manager: Node = null
 var event_bus: Node = null
 
+# --- Loading Screen ---
+var loading_screen: CanvasLayer = null
+var is_initial_load: bool = true
+var initial_chunks_needed: int = 0
+var initial_chunks_loaded: int = 0
+
 const NEIGHBORS = [
 	TileSet.CELL_NEIGHBOR_RIGHT_SIDE,
 	TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_CORNER,
@@ -49,6 +55,9 @@ func _ready() -> void:
 	# 미니맵 등에서 참조할 수 있도록 그룹 추가
 	add_to_group("level")
 
+	# 로딩 화면 생성
+	_setup_loading_screen()
+
 	# Core system references
 	game_manager = get_node_or_null("/root/GameManager")
 	event_bus = get_node_or_null("/root/EventBus")
@@ -56,11 +65,6 @@ func _ready() -> void:
 	# EventBus 이벤트 구독 (느슨한 결합)
 	if event_bus:
 		event_bus.player_died.connect(_on_player_died_event)
-
-	# GameManager에 레벨 등록
-	if game_manager:
-		game_manager.register_level(self)
-		game_manager.start_game()
 
 	# Load default config if not set
 	if not world_config:
@@ -83,10 +87,73 @@ func _ready() -> void:
 	_build_tile_rules()
 	_setup_tree_alternatives()
 
+	# 초기 청크 로딩 시작
+	_start_initial_loading()
+
+## 로딩 화면 설정
+func _setup_loading_screen() -> void:
+	var loading_scene = load("res://scenes/ui/loading_screen.tscn")
+	if loading_scene:
+		loading_screen = loading_scene.instantiate()
+		add_child(loading_screen)
+
+## 초기 청크 로딩 시작
+func _start_initial_loading() -> void:
+	if not player:
+		_finish_initial_loading()
+		return
+
+	var player_pos = tile_map.local_to_map(player.position)
+	var current_chunk = Vector2i(
+		floor(player_pos.x / float(world_config.chunk_size)),
+		floor(player_pos.y / float(world_config.chunk_size))
+	)
+
+	# 초기 로딩에 필요한 청크 수 계산 (render_distance 범위)
+	var rd = world_config.render_distance
+	initial_chunks_needed = (rd * 2 + 1) * (rd * 2 + 1)
+	initial_chunks_loaded = 0
+
+	# 초기 청크 생성 예약
+	for x in range(current_chunk.x - rd, current_chunk.x + rd + 1):
+		for y in range(current_chunk.y - rd, current_chunk.y + rd + 1):
+			var chunk = Vector2i(x, y)
+			generation_mutex.lock()
+			chunks_being_generated[chunk] = true
+			generation_mutex.unlock()
+			WorkerThreadPool.add_task(_generate_chunk.bind(chunk))
+
+## 초기 로딩 완료 체크
+func _check_initial_loading_complete() -> void:
+	if not is_initial_load:
+		return
+
+	# 모든 초기 청크가 그려졌는지 확인
+	if drawn_chunks.size() >= initial_chunks_needed:
+		_finish_initial_loading()
+
+## 초기 로딩 완료
+func _finish_initial_loading() -> void:
+	if not is_initial_load:
+		return
+
+	is_initial_load = false
+
+	# GameManager에 레벨 등록 및 게임 시작
+	if game_manager:
+		game_manager.register_level(self)
+		game_manager.start_game()
+
+	# 로딩 화면 숨기기
+	if loading_screen:
+		loading_screen.finish_loading()
+
 ## 플레이어 설정 (동적 탐색 및 스폰)
 func _setup_player() -> void:
-	# 씬 내 플레이어 또는 그룹에서 찾기
-	player = get_node_or_null("Player")
+	# 씬 내 플레이어 또는 그룹에서 찾기 (EntityLayer 안에 있을 수 있음)
+	player = get_node_or_null("EntityLayer/Player")
+	if not player:
+		player = get_node_or_null("Player")
 	if not player:
 		player = get_tree().get_first_node_in_group("player")
 
@@ -166,11 +233,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		if debug_container:
 			debug_container.visible = not debug_container.visible
 
-func _process(delta: float) -> void:
-	# GameManager 상태 체크
-	var is_game_over = game_manager.is_game_over if game_manager else false
+func _process(_delta: float) -> void:
+	# 초기 로딩 중에는 game_over 체크 무시 (청크 로딩 필요)
+	if not is_initial_load:
+		var is_game_over = game_manager.is_game_over if game_manager else false
+		if is_game_over:
+			return
 
-	if not player or is_game_over:
+	if not player:
 		return
 
 	var player_pos = tile_map.local_to_map(player.position)
@@ -240,6 +310,12 @@ func _draw_chunk(chunk: Vector2i) -> void:
 					tile_map.set_cell(layer, pos, 0, Vector2i(data.x, data.y), data.z)
 	generator.data_mutex.unlock()
 	drawn_chunks[chunk] = true
+
+	# 초기 로딩 진행률 업데이트
+	if is_initial_load and loading_screen:
+		var progress = float(drawn_chunks.size()) / float(initial_chunks_needed)
+		loading_screen.update_progress(clamp(progress, 0.0, 1.0))
+		_check_initial_loading_complete()
 
 	var texture = _create_debug_texture(chunk)
 	if texture:
