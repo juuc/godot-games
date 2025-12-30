@@ -1301,13 +1301,17 @@ layer_2/name = "grass"
 layer_3/name = "cliff"
 layer_4/name = "environment"
 
-[node name="Player" parent="." instance=ExtResource("3_w8frs")]
+[node name="EntityLayer" type="CanvasLayer" parent="."]
+layer = 1
+follow_viewport_enabled = true
+
+[node name="Player" parent="EntityLayer" instance=ExtResource("3_w8frs")]
 
 [node name="ZoomUI" parent="." instance=ExtResource("4_zoomui")]
 
 [node name="MobileControls" parent="." instance=ExtResource("5_mobile")]
 
-[node name="SpawnManager" type="Node" parent="."]
+[node name="SpawnManager" type="Node" parent="EntityLayer"]
 script = ExtResource("7_spawn")
 enemy_data_list = [ExtResource("8_crab")]
 spawn_interval = 2.0
