@@ -248,6 +248,9 @@ func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knockback
 	if event_bus:
 		event_bus.enemy_damaged.emit(self, amount)
 
+	# 데미지 팝업 생성
+	_spawn_damage_popup(amount)
+
 	# 넉백 적용
 	if knockback_force > 0 and enemy_data:
 		var resistance = enemy_data.knockback_resistance
@@ -402,3 +405,23 @@ func _spawn_treasure_chest() -> void:
 ## 타겟 설정
 func set_target(new_target: Node2D) -> void:
 	target = new_target
+
+## 데미지 팝업 씬
+var damage_popup_scene: PackedScene = null
+
+## 데미지 팝업 생성
+func _spawn_damage_popup(amount: float) -> void:
+	# 씬 로드 (캐시)
+	if not damage_popup_scene:
+		damage_popup_scene = load("res://scenes/ui/damage_popup.tscn")
+
+	if not damage_popup_scene:
+		return
+
+	var popup = damage_popup_scene.instantiate()
+	popup.global_position = global_position + Vector2(0, -10)  # 약간 위에
+
+	get_tree().current_scene.call_deferred("add_child", popup)
+
+	# setup은 다음 프레임에 호출 (씬 트리에 추가된 후)
+	popup.call_deferred("setup", amount, "damage")
