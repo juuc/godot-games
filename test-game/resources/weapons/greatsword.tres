@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://weapon_greatsword"]
+
+[ext_resource type="Script" path="res://_shared/scripts/weapons/weapon_data.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+id = "greatsword"
+display_name = "Greatsword"
+description = "대검. 넓은 범위의 근접 공격."
+base_damage = 3.0
+fire_rate = 1.0
+knockback_force = 250.0
+projectile_speed = 0.0
+projectile_lifetime = 0.0
+projectiles_per_shot = 1
+spread_angle = 0.0
+auto_fire = true
+auto_aim = false
+pierce_count = 0
+is_melee = true
+base_range = 80.0
+arc_angle = 120.0
+slash_duration = 0.2
+max_level = 5
+level_damage = Array[float]([3.0, 3.5, 4.0, 5.0, 7.0])
+level_fire_rate = Array[float]([1.0, 0.95, 0.9, 0.85, 0.8])
+level_projectiles = Array[int]([])
+level_range = Array[float]([80.0, 100.0, 120.0, 150.0, 200.0])

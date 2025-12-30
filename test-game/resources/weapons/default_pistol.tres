@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://weapon_default_pistol"]
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://weapon_default_pistol"]
 
 [ext_resource type="Script" path="res://_shared/scripts/weapons/weapon_data.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/bullet.tscn" id="2_bullet"]
 
 [resource]
 script = ExtResource("1_script")
+projectile_scene = ExtResource("2_bullet")
 id = "default_pistol"
 display_name = "Default Pistol"
 description = "기본 권총. 균형 잡힌 성능."
@@ -17,3 +19,12 @@ spread_angle = 0.0
 auto_fire = true
 auto_aim = false
 pierce_count = 0
+is_melee = false
+base_range = 80.0
+arc_angle = 120.0
+slash_duration = 0.2
+max_level = 5
+level_damage = Array[float]([1.0, 1.2, 1.5, 1.8, 2.5])
+level_fire_rate = Array[float]([0.25, 0.22, 0.2, 0.18, 0.15])
+level_projectiles = Array[int]([])
+level_range = Array[float]([])

@@ -23,7 +23,8 @@ var cooldown_timer: float = 0.0
 
 ## 스탯 수정자 (스킬 등에서 적용)
 var damage_multiplier: float = 1.0
-var fire_rate_multiplier: float = 1.0
+var fire_rate_multiplier: float = 1.0  ## 무기 레벨 배수 (WeaponManager)
+var skill_fire_rate_multiplier: float = 1.0  ## 스킬 배수 (StatManager)
 var projectile_speed_multiplier: float = 1.0
 var additional_projectiles: int = 0
 
@@ -173,7 +174,7 @@ func _get_damage() -> float:
 	return weapon_data.base_damage * damage_multiplier
 
 func _get_fire_rate() -> float:
-	return weapon_data.fire_rate * fire_rate_multiplier
+	return weapon_data.fire_rate * fire_rate_multiplier * skill_fire_rate_multiplier
 
 func _get_projectile_speed() -> float:
 	return weapon_data.projectile_speed * projectile_speed_multiplier
@@ -184,9 +185,13 @@ func _get_projectile_speed() -> float:
 func set_damage_multiplier(value: float) -> void:
 	damage_multiplier = value
 
-## 발사 속도 수정자 설정 (낮을수록 빠름)
+## 발사 속도 수정자 설정 - 무기 레벨용 (WeaponManager)
 func set_fire_rate_multiplier(value: float) -> void:
 	fire_rate_multiplier = value
+
+## 발사 속도 수정자 설정 - 스킬용 (Player/StatManager)
+func set_skill_fire_rate_multiplier(value: float) -> void:
+	skill_fire_rate_multiplier = value
 
 ## 추가 발사체 수 설정
 func set_additional_projectiles(count: int) -> void:
@@ -196,6 +201,7 @@ func set_additional_projectiles(count: int) -> void:
 func reset_modifiers() -> void:
 	damage_multiplier = 1.0
 	fire_rate_multiplier = 1.0
+	skill_fire_rate_multiplier = 1.0
 	projectile_speed_multiplier = 1.0
 	additional_projectiles = 0
 
