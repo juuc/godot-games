@@ -42,6 +42,7 @@ World (Node2D)
 [autoload]
 EventBus="*res://_shared/scripts/core/event_bus.gd"
 GameManager="*res://_shared/scripts/core/game_manager.gd"
+StatsManager="*res://_shared/scripts/core/stats_manager.gd"
 ```
 
 ### Collision Layers
@@ -64,6 +65,8 @@ GameManager="*res://_shared/scripts/core/game_manager.gd"
 |------|------|
 | `scenes/level.gd` | 월드 관리, 청크, TileMap |
 | `scenes/player.gd` | 이동, 발사, 레벨업 |
+| `scenes/ui/main_menu.gd` | 메인 메뉴 (시작, 통계, 종료) |
+| `scenes/ui/stats_screen.gd` | 누적 통계 화면 |
 | `scenes/ui/hud.gd` | 체력바, XP바, 타이머 |
 | `scenes/ui/game_over.gd` | 게임오버 화면 |
 
@@ -82,6 +85,7 @@ GameManager="*res://_shared/scripts/core/game_manager.gd"
 |------|-------|------|
 | `_shared/scripts/core/event_bus.gd` | - | 이벤트 허브 |
 | `_shared/scripts/core/game_manager.gd` | - | 상태/통계 |
+| `_shared/scripts/core/stats_manager.gd` | - | 통계 저장/로드 |
 | `_shared/scripts/enemies/spawn_manager.gd` | SpawnManager | 스폰, 컬링 |
 | `_shared/scripts/weapons/weapon_manager.gd` | WeaponManager | 다중 무기 |
 | `_shared/scripts/progression/stat_manager.gd` | StatManager | 스탯 계산 |

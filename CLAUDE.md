@@ -34,6 +34,7 @@ godot-games/
 |------|------|
 | `event_bus.gd` | 전역 이벤트 버스 (시스템 간 느슨한 결합) |
 | `game_manager.gd` | 게임 상태/통계 관리, 타이머 |
+| `stats_manager.gd` | 통계 저장/로드 (user://stats.json) |
 | `audio_manager.gd` | 중앙 오디오 관리 (SFX 풀, 음악) |
 
 ### Player
@@ -79,6 +80,7 @@ godot-games/
    [autoload]
    EventBus="*res://_shared/scripts/core/event_bus.gd"
    GameManager="*res://_shared/scripts/core/game_manager.gd"
+   StatsManager="*res://_shared/scripts/core/stats_manager.gd"
    ```
 4. [architecture.md](docs/architecture.md)의 확장 가이드 참고
 

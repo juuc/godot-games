@@ -2,7 +2,7 @@
 
 뱀서라이크 게임 프레임워크의 공유 모듈 API 레퍼런스입니다.
 
-> **Last Updated**: 2024-12-30
+> **Last Updated**: 2024-12-31
 >
 > **관련 문서**: [아키텍처 가이드](architecture.md)
 
@@ -13,6 +13,7 @@ _shared/scripts/
 ├── core/
 │   ├── event_bus.gd           # 전역 이벤트 버스 (Autoload)
 │   ├── game_manager.gd        # 게임 상태 관리 (Autoload)
+│   ├── stats_manager.gd       # 통계 저장/로드 (Autoload)
 │   └── audio_manager.gd       # 오디오 관리 (Autoload)
 ├── player/
 │   └── player_base.gd         # 플레이어 기본 클래스
@@ -37,6 +38,8 @@ _shared/scripts/
 │   ├── stat_modifier.gd       # 스탯 수정자 (FLAT/PERCENT/MULTIPLY)
 │   └── stat_manager.gd        # 중앙 스탯 계산기
 ├── ui/
+│   ├── main_menu.gd           # 메인 메뉴 (게임 시작 화면)
+│   ├── stats_screen.gd        # 통계 화면
 │   ├── skill_selection_ui.gd  # 스킬 선택 UI 베이스
 │   ├── hud_base.gd            # HUD 베이스
 │   └── minimap_base.gd        # 미니맵 베이스
@@ -85,6 +88,7 @@ cp -r _shared/scripts/ your-game/_shared/scripts/
 [autoload]
 EventBus="*res://_shared/scripts/core/event_bus.gd"
 GameManager="*res://_shared/scripts/core/game_manager.gd"
+StatsManager="*res://_shared/scripts/core/stats_manager.gd"
 
 [layer_names]
 2d_physics/layer_1="landscape"
@@ -177,6 +181,34 @@ GameManager.get_formatted_remaining_time() -> String
 타이머 이벤트는 EventBus를 통해 발행됩니다:
 - `timer_updated(remaining, total)` - 매 프레임
 - `cycle_completed(cycle_number)` - 사이클 완료 시
+
+### StatsManager
+
+게임 결과를 저장하고 누적 통계를 제공합니다.
+
+```gdscript
+# 저장 경로
+const SAVE_PATH = "user://stats.json"
+
+# 게임 결과 저장 (게임오버 시 자동 호출)
+StatsManager.save_result(result: Dictionary)
+
+# 통계 조회
+StatsManager.get_stats() -> Dictionary
+StatsManager.get_formatted_stats() -> Dictionary  # UI 표시용
+StatsManager.has_played() -> bool
+
+# 통계 초기화
+StatsManager.reset_stats()
+```
+
+저장되는 통계:
+- `total_plays` - 총 플레이 횟수
+- `total_time` - 총 플레이 시간
+- `total_kills` - 총 처치 수
+- `total_xp` - 총 획득 XP
+- `best_level`, `best_kills`, `best_time`, `best_wave` - 최고 기록
+- `recent_results` - 최근 10게임 기록
 
 ---
 
@@ -368,6 +400,30 @@ enum SkillType { PASSIVE, WEAPON }
 ---
 
 ## UI Systems
+
+### MainMenu
+
+게임 시작 화면:
+
+```gdscript
+# 버튼
+- Start Game → level.tscn으로 전환
+- Statistics → StatsScreen 표시
+- Quit → 게임 종료
+```
+
+### StatsScreen
+
+누적 통계 표시:
+
+```gdscript
+signal back_requested
+
+# StatsManager에서 통계 조회
+# - 누적 통계 (플레이 수, 총 시간, 총 킬 등)
+# - 최고 기록 (오렌지 하이라이트)
+# - 최근 게임 5개 표시
+```
 
 ### EntityLayer 패턴
 

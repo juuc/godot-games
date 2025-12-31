@@ -2,7 +2,7 @@
 
 뱀서라이크 게임 프레임워크의 아키텍처 설계 문서입니다.
 
-> **Last Updated**: 2024-12-30
+> **Last Updated**: 2024-12-31
 
 ## 목차
 
@@ -75,6 +75,7 @@ flowchart TB
     subgraph Core["Core Layer (Autoload)"]
         EB[EventBus]
         GM[GameManager]
+        SM_STATS[StatsManager]
         AM[AudioManager]
     end
 
@@ -92,6 +93,8 @@ flowchart TB
         end
 
         subgraph UISys["UI"]
+            MENU[MainMenu]
+            STATS_UI[StatsScreen]
             HUD[HUD]
             MINI[Minimap]
             SKILL[SkillSelection]
@@ -123,7 +126,7 @@ flowchart TB
 
 | Layer | 책임 | 예시 |
 |-------|------|------|
-| **Core** | 전역 서비스, 상태 관리 | EventBus, GameManager |
+| **Core** | 전역 서비스, 상태 관리 | EventBus, GameManager, StatsManager |
 | **Game** | 게임 로직, 엔티티 | Player, Enemy, UI |
 | **Data** | 설정, 밸런싱 값 | WeaponData, EnemyData |
 
@@ -352,6 +355,29 @@ func _cull_distant_enemies(count: int) -> int:
 ---
 
 ## 씬 구조
+
+### 게임 플로우
+
+```
+[게임 실행]
+     ↓
+[MainMenu] ←────────────────────┐
+  ├─ Start Game → [level.tscn]  │
+  ├─ Statistics → [StatsScreen] │
+  └─ Quit                       │
+                                │
+[level.tscn - 게임플레이]        │
+     ↓                          │
+[Player Dies]                   │
+     ↓                          │
+[GameManager.trigger_game_over] │
+     ↓                          │
+[StatsManager.save_result()]    │  ← user://stats.json 저장
+     ↓                          │
+[GameOver UI]                   │
+  ├─ Restart → [level.tscn]     │
+  └─ Main Menu ─────────────────┘
+```
 
 ### EntityLayer 패턴
 
