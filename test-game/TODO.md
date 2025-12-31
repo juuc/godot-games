@@ -1,6 +1,6 @@
 # Test Game - TODO
 
-> **Last Updated**: 2024-12-30
+> **Last Updated**: 2024-12-31
 
 ## Architecture Overview
 
@@ -50,7 +50,7 @@
 
 ### P2: Medium (폴리시)
 
-- [ ] 데미지 숫자 팝업
+- [x] ~~데미지 숫자 팝업~~ - 팡팡 튀는 타격감 효과
 - [ ] 킬/시간 통계 UI
 - [ ] 레벨업 시 무적 시간 (2초)
 - [ ] 무기/패시브 슬롯 HUD 표시
@@ -62,7 +62,7 @@
 
 ### P3: Low (나중에)
 
-- [ ] 메인 메뉴
+- [x] ~~메인 메뉴~~ - StatsManager + 통계 화면 포함
 - [ ] 캐릭터 선택
 - [ ] 메타 진행 (영구 업그레이드)
 - [ ] 지형 개선 (다중 노이즈)
@@ -77,6 +77,7 @@
 |--------|------|------|
 | EventBus | `core/event_bus.gd` | 전역 이벤트 버스 |
 | GameManager | `core/game_manager.gd` | 게임 상태 관리 |
+| StatsManager | `core/stats_manager.gd` | 통계 저장/로드 (user://stats.json) |
 
 ### Player Systems
 | 시스템 | 파일 | 설명 |
@@ -107,6 +108,8 @@
 ### UI Systems
 | 시스템 | 파일 | 설명 |
 |--------|------|------|
+| MainMenu | `ui/main_menu.gd` | 메인 메뉴 (시작, 통계, 종료) |
+| StatsScreen | `ui/stats_screen.gd` | 누적 통계 표시 |
 | HUD | `ui/hud_base.gd` | 체력바, XP바 |
 | Minimap | `ui/minimap_base.gd` | 미니맵 + POI |
 | SkillSelection | `ui/skill_selection_ui.gd` | 레벨업 선택 UI |
@@ -121,6 +124,13 @@
 ---
 
 ## 최근 변경 이력
+
+### 2024-12-31
+- [x] 메인 메뉴 시스템 구현 (Start Game, Statistics, Quit)
+- [x] StatsManager 구현 (통계 저장/로드, user://stats.json)
+- [x] 통계 화면 구현 (누적 통계, 최근 게임 5개)
+- [x] 게임오버 → 메인 메뉴 연결 (버튼 변경)
+- [x] 데미지 숫자 팝업 구현 (팡팡 튀는 타격감)
 
 ### 2024-12-30
 - [x] Elite 적 구현 (60초마다, 스탯 3배, 미니맵 표시)
@@ -194,6 +204,6 @@
    - 관통탄 (pierce count)
 
 3. 폴리시
-   - 데미지 숫자 팝업
-   - 킬/시간 통계 UI
+   - 레벨업 시 무적 시간 (2초)
+   - 사운드 (레벨업, 발사, 피격, BGM)
 ```

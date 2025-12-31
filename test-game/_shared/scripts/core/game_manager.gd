@@ -119,6 +119,11 @@ func trigger_game_over() -> void:
 
 	var stats = get_final_stats()
 
+	# StatsManager에 결과 저장
+	var stats_manager = get_node_or_null("/root/StatsManager")
+	if stats_manager:
+		stats_manager.save_result(stats)
+
 	if event_bus:
 		event_bus.game_over.emit(stats)
 

@@ -84,8 +84,8 @@ func _on_restart_pressed() -> void:
 func _on_quit_pressed() -> void:
 	get_tree().paused = false
 	main_menu_requested.emit()
-	# 메인 메뉴가 없으면 게임 종료
-	get_tree().quit()
+	# 메인 메뉴로 이동
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 ## 외부에서 게임오버 트리거 (하위 호환성)
 func trigger_game_over(stats: Dictionary = {}) -> void:
