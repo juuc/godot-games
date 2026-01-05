@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="GameConfig" load_steps=2 format=3 uid="uid://c6qj8vkxqp8vy"]
+
+[ext_resource type="Script" path="res://_shared/scripts/core/game_config.gd" id="1_game_config"]
+
+[resource]
+script = ExtResource("1_game_config")
+cycle_duration = 600.0
+warning_threshold_yellow = 180.0
+warning_threshold_red = 60.0
+base_damage = 1.0
+base_fire_rate = 0.25
+levelup_invincibility_duration = 1.0
+max_weapon_slots = 3
+max_passive_slots = 3
+health_drop_base_chance = 0.05
+health_drop_low_hp_chance = 0.2
+health_drop_low_hp_threshold = 0.3
+treasure_drop_chance = 0.01
+enemy_separation_radius = 20.0
+enemy_separation_force = 80.0
+enemy_attack_cooldown = 1.0
+enemy_attack_range = 25.0
+knockback_decay = 10.0
+enemy_animation_speed = 10.0
+direction_smoothing = 0.15
+slot_size = Vector2(36, 36)
+weapon_slot_color = Color(1, 0.6, 0.2, 1)
+passive_slot_color = Color(0.3, 0.6, 1, 1)
+empty_slot_color = Color(0.2, 0.2, 0.2, 0.5)
