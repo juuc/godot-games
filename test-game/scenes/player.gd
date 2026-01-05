@@ -1,8 +1,6 @@
 extends "res://_shared/scripts/player/player_base.gd"
 
 ## Test Game 플레이어
-
-const ResourcePathsClass = preload("res://_shared/scripts/core/resource_paths.gd")
 ## WeaponManager 기반 다중 무기 시스템, 지형 충돌, 애니메이션, 스킬 시스템
 
 const SkillManagerClass = preload("res://_shared/scripts/progression/skill_manager.gd")

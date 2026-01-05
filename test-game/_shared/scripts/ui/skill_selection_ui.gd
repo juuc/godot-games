@@ -36,7 +36,7 @@ func set_skill_manager(manager) -> void:
 	skill_manager = manager
 
 ## 선택지 표시
-func show_selection(options: Array) -> void:
+func show_selection(options: Array[Dictionary]) -> void:
 	current_options = options
 
 	# 게임 일시정지
