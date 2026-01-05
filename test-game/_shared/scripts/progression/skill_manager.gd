@@ -5,8 +5,8 @@ extends RefCounted
 ## 획득한 스킬, 레벨, 선택 로직 담당
 ## 패시브 스킬 슬롯 제한 지원
 
-signal skill_acquired(skill, level: int)
-signal skill_upgraded(skill, new_level: int)
+signal skill_acquired(skill: SkillData, level: int)
+signal skill_upgraded(skill: SkillData, new_level: int)
 signal selection_required(options: Array)
 
 ## 최대 패시브 스킬 슬롯 수 (GameConfig에서 가져옴)
@@ -30,7 +30,7 @@ func set_skill_pool(skills: Array[SkillData]) -> void:
 	available_skills = skills
 
 ## 스킬 획득/업그레이드
-func acquire_skill(skill) -> void:
+func acquire_skill(skill: SkillData) -> void:
 	var current_level = acquired_skills.get(skill.id, 0)
 
 	if current_level >= skill.max_level:
@@ -113,7 +113,7 @@ func can_acquire_passive() -> bool:
 	return get_passive_count() < max_passive_slots
 
 ## ID로 스킬 찾기
-func _get_skill_by_id(skill_id: String):
+func _get_skill_by_id(skill_id: String) -> SkillData:
 	for skill in available_skills:
 		if skill.id == skill_id:
 			return skill

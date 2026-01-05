@@ -4,8 +4,8 @@ extends RefCounted
 ## 다중 무기 관리자
 ## 최대 3개의 무기를 관리하고, 획득/업그레이드를 처리합니다.
 
-signal weapon_acquired(weapon_data, level: int)
-signal weapon_upgraded(weapon_data, new_level: int)
+signal weapon_acquired(weapon_data: WeaponData, level: int)
+signal weapon_upgraded(weapon_data: WeaponData, new_level: int)
 signal weapons_changed
 
 const MAX_WEAPONS: int = 3
@@ -31,7 +31,7 @@ func set_weapon_parent(parent: Node2D) -> void:
 	weapon_parent = parent
 
 ## 무기 추가 또는 업그레이드
-func add_weapon(weapon_data) -> bool:
+func add_weapon(weapon_data: WeaponData) -> bool:
 	var weapon_id = weapon_data.id
 
 	if active_weapons.has(weapon_id):
@@ -84,7 +84,7 @@ func can_add_weapon() -> bool:
 	return active_weapons.size() < MAX_WEAPONS
 
 ## 무기 인스턴스 생성 및 등록
-func create_weapon_instance(weapon_data, WeaponBaseClass, MeleeWeaponBaseClass = null) -> Node2D:
+func create_weapon_instance(weapon_data: WeaponData, WeaponBaseClass: GDScript, MeleeWeaponBaseClass: GDScript = null) -> Node2D:
 	var instance: Node2D
 
 	# 근접 무기 여부 확인
@@ -164,7 +164,7 @@ func _update_weapon_instance_stats(weapon_id: String) -> void:
 			break
 
 ## 레벨에 따른 스탯 적용
-func _apply_level_stats(instance, weapon_data, level: int) -> void:
+func _apply_level_stats(instance: Node2D, weapon_data: WeaponData, level: int) -> void:
 	if level <= 0:
 		return
 

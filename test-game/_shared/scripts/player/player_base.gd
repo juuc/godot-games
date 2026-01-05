@@ -37,7 +37,7 @@ var player_sprite: AnimatedSprite2D
 
 # --- Core Systems ---
 var event_bus: Node = null
-var stat_manager = null  ## StatManager 인스턴스
+var stat_manager: StatManager = null  ## StatManager 인스턴스
 
 # --- Computed Stats (StatManager에서 계산) ---
 var speed: float:
@@ -269,7 +269,7 @@ func _calculate_xp_for_level(level: int) -> int:
 # --- Stat Modifier API ---
 
 ## 스킬에서 수정자 적용
-func apply_skill_modifier(skill, level: int) -> void:
+func apply_skill_modifier(skill: SkillData, level: int) -> void:
 	if not stat_manager:
 		return
 
@@ -283,7 +283,7 @@ func apply_skill_modifier(skill, level: int) -> void:
 			stat_manager.add_modifier(modifier)
 
 ## 모든 스킬 수정자 재적용 (SkillManager와 연동)
-func apply_all_skill_modifiers(skill_manager) -> void:
+func apply_all_skill_modifiers(skill_manager_instance: SkillManager) -> void:
 	if not stat_manager:
 		return
 
@@ -291,16 +291,16 @@ func apply_all_skill_modifiers(skill_manager) -> void:
 	stat_manager.clear_modifiers()
 
 	# 획득한 스킬들의 수정자 적용
-	if skill_manager and skill_manager.has_method("get_acquired_skills"):
-		var acquired = skill_manager.get_acquired_skills()
+	if skill_manager_instance and skill_manager_instance.has_method("get_acquired_skills"):
+		var acquired = skill_manager_instance.get_acquired_skills()
 		for skill_id in acquired:
-			var skill = skill_manager.get_skill(skill_id)
-			var skill_level = skill_manager.get_skill_level(skill_id)
+			var skill = skill_manager_instance.get_skill(skill_id)
+			var skill_level = skill_manager_instance.get_skill_level(skill_id)
 			if skill and skill.has_method("create_modifier"):
 				var modifier = skill.create_modifier(skill_level)
 				if modifier:
 					stat_manager.add_modifier(modifier)
 
 ## StatManager 직접 접근 (고급 사용)
-func get_stat_manager():
+func get_stat_manager() -> StatManager:
 	return stat_manager
