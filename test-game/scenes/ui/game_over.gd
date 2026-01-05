@@ -88,3 +88,9 @@ func _on_quit_pressed() -> void:
 ## 외부에서 게임오버 트리거 (하위 호환성)
 func trigger_game_over(stats: Dictionary = {}) -> void:
 	show_game_over(stats)
+
+## 씬 정리 시 시그널 연결 해제 (메모리 누수 방지)
+func _exit_tree() -> void:
+	if Services.event_bus and is_instance_valid(Services.event_bus):
+		if Services.event_bus.game_over.is_connected(_on_game_over):
+			Services.event_bus.game_over.disconnect(_on_game_over)
