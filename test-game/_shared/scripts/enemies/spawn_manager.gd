@@ -4,6 +4,9 @@ extends Node
 ## 적 스폰 관리자
 ## 플레이어 주변에 적을 주기적으로 스폰합니다.
 ## EventBus를 통해 게임 시스템과 느슨하게 결합
+## 난이도 스케일링은 DifficultyScaler에 위임
+
+const DifficultyScalerClass = preload("res://_shared/scripts/enemies/difficulty_scaler.gd")
 
 signal enemy_spawned(enemy: EnemyBase)
 signal enemy_died(enemy: EnemyBase, position: Vector2)
@@ -41,28 +44,26 @@ var spawn_timer: float = 0.0
 var elite_spawn_timer: float = 0.0  ## Elite 스폰 타이머
 var current_enemy_count: int = 0  ## 일반 적 수
 var current_elite_count: int = 0  ## 엘리트 적 수 (별도 관리)
-var game_time: float = 0.0  ## 게임 시간 (난이도 스케일링용)
 var is_spawning_enabled: bool = true
 
-## Wave System
-var current_wave: int = 1
-var last_wave_time: float = 0.0  ## 마지막 웨이브 시작 시간
-
-## Base values (초기값 저장)
-var _base_spawn_interval: float
-var _base_enemies_per_spawn: int
-
-## Current scaled values
-var current_health_multiplier: float = 1.0
-var current_damage_multiplier: float = 1.0
+## 난이도 스케일러 (웨이브/스케일링 로직 위임)
+var difficulty_scaler: DifficultyScalerClass
 
 ## EventBus 참조
 var event_bus: Node = null
 
 func _ready() -> void:
-	# 초기값 저장
-	_base_spawn_interval = spawn_interval
-	_base_enemies_per_spawn = enemies_per_spawn
+	# 난이도 스케일러 초기화
+	difficulty_scaler = DifficultyScalerClass.new()
+	difficulty_scaler.initialize(spawn_interval, enemies_per_spawn)
+	difficulty_scaler.configure({
+		"difficulty_interval": difficulty_interval,
+		"health_scale_per_wave": health_scale_per_wave,
+		"damage_scale_per_wave": damage_scale_per_wave,
+		"min_spawn_interval": min_spawn_interval,
+		"max_enemies_per_spawn": max_enemies_per_spawn
+	})
+	difficulty_scaler.wave_changed.connect(_on_wave_changed)
 
 	# EventBus 참조
 	event_bus = Services.event_bus
@@ -77,6 +78,10 @@ func _ready() -> void:
 	if not player:
 		await get_tree().process_frame
 		player = get_tree().get_first_node_in_group("player")
+
+## DifficultyScaler 웨이브 변경 시그널 전달
+func _on_wave_changed(wave: int, health_mult: float, damage_mult: float) -> void:
+	wave_changed.emit(wave, health_mult, damage_mult)
 
 ## EventBus: 플레이어 스폰 시 타겟 업데이트
 func _on_player_spawned(new_player: Node2D) -> void:
@@ -93,17 +98,9 @@ func _on_game_restarted() -> void:
 	current_elite_count = 0
 	spawn_timer = 0.0
 	elite_spawn_timer = 0.0
-	game_time = 0.0
 
-	# 웨이브 초기화
-	current_wave = 1
-	last_wave_time = 0.0
-	current_health_multiplier = 1.0
-	current_damage_multiplier = 1.0
-
-	# 스폰 설정 초기화
-	spawn_interval = _base_spawn_interval
-	enemies_per_spawn = _base_enemies_per_spawn
+	# 난이도 스케일러 초기화
+	difficulty_scaler.reset()
 
 ## 스폰 컨테이너 반환 (명시적 설정 > 부모 노드 폴백)
 func _get_spawn_container() -> Node:
@@ -147,67 +144,38 @@ func _process(delta: float) -> void:
 	if not player or not is_spawning_enabled:
 		return
 
-	game_time += delta
 	spawn_timer += delta
 	elite_spawn_timer += delta
 
-	# 난이도 스케일링 체크
+	# 난이도 스케일링 업데이트 (웨이브 체크 포함)
+	var spawn_settings: Dictionary = {}
 	if enable_difficulty_scaling:
-		_check_wave_advance()
+		spawn_settings = difficulty_scaler.update(delta)
+
+	# 현재 스폰 간격 결정
+	var current_spawn_interval = spawn_settings.get("spawn_interval", spawn_interval) if enable_difficulty_scaling else spawn_interval
+	var current_enemies_per_spawn = spawn_settings.get("enemies_per_spawn", enemies_per_spawn) if enable_difficulty_scaling else enemies_per_spawn
 
 	# 일반 적 스폰
-	if spawn_timer >= spawn_interval:
+	if spawn_timer >= current_spawn_interval:
 		spawn_timer = 0.0
-		_spawn_enemies()
+		_spawn_enemies(current_enemies_per_spawn)
 
 	# Elite 스폰 (시간 기반)
 	if elite_spawn_timer >= elite_spawn_interval:
 		elite_spawn_timer = 0.0
 		_spawn_elite_enemy()
 
-## 웨이브 진행 체크 및 난이도 증가
-func _check_wave_advance() -> void:
-	var time_since_last_wave = game_time - last_wave_time
-	if time_since_last_wave >= difficulty_interval:
-		_advance_wave()
-
-## 웨이브 진행 (난이도 증가)
-func _advance_wave() -> void:
-	current_wave += 1
-	last_wave_time = game_time
-
-	# 스폰 속도 증가 (간격 감소)
-	spawn_interval = maxf(min_spawn_interval, _base_spawn_interval * pow(0.9, current_wave - 1))
-
-	# 동시 스폰 수 증가
-	enemies_per_spawn = mini(max_enemies_per_spawn, _base_enemies_per_spawn + (current_wave - 1))
-
-	# 적 스탯 스케일링
-	current_health_multiplier = 1.0 + (current_wave - 1) * health_scale_per_wave
-	current_damage_multiplier = 1.0 + (current_wave - 1) * damage_scale_per_wave
-
-	# 시그널 발행
-	wave_changed.emit(current_wave, current_health_multiplier, current_damage_multiplier)
-
-	# EventBus로도 발행
-	if event_bus:
-		event_bus.wave_started.emit(current_wave)
-
-	print("[Wave %d] Interval: %.2f, Spawn: %d, HP: x%.2f, DMG: x%.2f" % [
-		current_wave, spawn_interval, enemies_per_spawn,
-		current_health_multiplier, current_damage_multiplier
-	])
-
-func _spawn_enemies() -> void:
+func _spawn_enemies(count: int) -> void:
 	if enemy_data_list.is_empty():
 		return
 
 	var available_slots = max_enemies - current_enemy_count
-	var to_spawn = min(enemies_per_spawn, available_slots)
+	var to_spawn = min(count, available_slots)
 
 	# 슬롯 부족 시 먼 적 컬링 시도
-	if to_spawn < enemies_per_spawn:
-		var need_to_cull = enemies_per_spawn - to_spawn
+	if to_spawn < count:
+		var need_to_cull = count - to_spawn
 		var culled = _cull_distant_enemies(need_to_cull)
 		to_spawn += culled
 
@@ -261,8 +229,9 @@ func _spawn_enemy_at_angle(data: EnemyData, angle: float) -> void:
 	# 타겟 설정
 	enemy.set_target(player)
 
-	# 난이도 스케일링 적용
-	_apply_difficulty_scaling(enemy)
+	# 난이도 스케일링 적용 (DifficultyScaler에 위임)
+	if enable_difficulty_scaling:
+		difficulty_scaler.apply_scaling_to_enemy(enemy)
 
 	current_enemy_count += 1
 	enemy_spawned.emit(enemy)
@@ -270,54 +239,6 @@ func _spawn_enemy_at_angle(data: EnemyData, angle: float) -> void:
 	# EventBus로도 발행
 	if event_bus:
 		event_bus.enemy_spawned.emit(enemy)
-
-func _spawn_enemy(data: EnemyData) -> void:
-	if not data or not data.scene:
-		return
-
-	var enemy = data.scene.instantiate() as EnemyBase
-	if not enemy:
-		return
-
-	# 위치 설정 (플레이어 주변 원형)
-	enemy.global_position = _get_spawn_position()
-
-	# 데이터 및 타겟 설정
-	enemy.enemy_data = data
-	enemy.set_target(player)
-
-	# 시그널 연결
-	enemy.died.connect(_on_enemy_died)
-
-	# 스폰 컨테이너에 추가
-	_get_spawn_container().add_child(enemy)
-
-	# 난이도 스케일링 적용
-	_apply_difficulty_scaling(enemy)
-
-	current_enemy_count += 1
-
-	enemy_spawned.emit(enemy)
-
-	# EventBus로도 발행
-	if event_bus:
-		event_bus.enemy_spawned.emit(enemy)
-
-## 난이도 스케일링 적용
-func _apply_difficulty_scaling(enemy: EnemyBase) -> void:
-	if not enable_difficulty_scaling or current_wave <= 1:
-		return
-
-	# 체력 스케일링
-	enemy.current_health *= current_health_multiplier
-
-	# 데미지는 EnemyBase에서 enemy_data.damage를 직접 참조하므로
-	# 별도의 multiplier 변수를 적에게 전달
-	if enemy.has_method("set_damage_multiplier"):
-		enemy.set_damage_multiplier(current_damage_multiplier)
-	else:
-		# 폴백: 커스텀 프로퍼티로 저장
-		enemy.set_meta("damage_multiplier", current_damage_multiplier)
 
 func _get_spawn_position() -> Vector2:
 	if not player:
@@ -372,7 +293,7 @@ func _spawn_elite_enemy() -> void:
 	var elite = spawn_elite(enemy_data)
 
 	if elite:
-		print("[Elite Spawn] %s spawned at wave %d" % [enemy_data.enemy_name, current_wave])
+		print("[Elite Spawn] %s spawned at wave %d" % [enemy_data.enemy_name, difficulty_scaler.get_current_wave()])
 
 ## 엘리트 적 스폰 (max_enemies 제한 무시)
 func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBase:
@@ -417,7 +338,8 @@ func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBas
 	enemy.apply_elite_visuals(elite_stat_multiplier)
 
 	# 엘리트에도 난이도 스케일링 적용
-	_apply_difficulty_scaling(enemy)
+	if enable_difficulty_scaling:
+		difficulty_scaler.apply_scaling_to_enemy(enemy)
 
 	current_elite_count += 1
 	enemy_spawned.emit(enemy)
@@ -441,3 +363,11 @@ func _exit_tree() -> void:
 			event_bus.game_over.disconnect(_on_game_over)
 		if event_bus.game_restarted.is_connected(_on_game_restarted):
 			event_bus.game_restarted.disconnect(_on_game_restarted)
+
+## 현재 웨이브 반환
+func get_current_wave() -> int:
+	return difficulty_scaler.get_current_wave()
+
+## 현재 게임 시간 반환
+func get_game_time() -> float:
+	return difficulty_scaler.get_game_time()
