@@ -1,6 +1,8 @@
 extends Node2D
 
 ## World Generator를 사용하는 레벨 스크립트
+
+const ResourcePathsClass = preload("res://_shared/scripts/core/resource_paths.gd")
 ## WorldConfig 리소스로 설정을 외부화하여 재사용 가능
 ## GameManager와 EventBus로 게임 상태 관리 위임
 
@@ -59,8 +61,8 @@ func _ready() -> void:
 	_setup_loading_screen()
 
 	# Core system references
-	game_manager = get_node_or_null("/root/GameManager")
-	event_bus = get_node_or_null("/root/EventBus")
+	game_manager = Services.game_manager
+	event_bus = Services.event_bus
 
 	# EventBus 이벤트 구독 (느슨한 결합)
 	if event_bus:
@@ -92,7 +94,7 @@ func _ready() -> void:
 
 ## 로딩 화면 설정
 func _setup_loading_screen() -> void:
-	var loading_scene = load("res://scenes/ui/loading_screen.tscn")
+	var loading_scene = ResourcePathsClass.load_scene(ResourcePathsClass.UI_LOADING_SCREEN)
 	if loading_scene:
 		loading_screen = loading_scene.instantiate()
 		add_child(loading_screen)
@@ -519,3 +521,9 @@ func _pick_weighted(candidates: Array) -> Vector2i:
 func is_tile_walkable(global_pos: Vector2) -> bool:
 	var map_pos = tile_map.local_to_map(global_pos)
 	return generator.is_walkable(map_pos.x, map_pos.y)
+
+## 씬 정리 시 시그널 연결 해제 (메모리 누수 방지)
+func _exit_tree() -> void:
+	if event_bus and is_instance_valid(event_bus):
+		if event_bus.player_died.is_connected(_on_player_died_event):
+			event_bus.player_died.disconnect(_on_player_died_event)

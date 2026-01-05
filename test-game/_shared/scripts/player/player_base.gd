@@ -2,6 +2,8 @@ class_name PlayerBase
 extends CharacterBody2D
 
 ## 모든 플레이어의 기본 클래스
+
+const ResourcePathsClass = preload("res://_shared/scripts/core/resource_paths.gd")
 ## 체력, 이동, 데미지 처리를 담당합니다.
 ## EventBus를 통해 이벤트 발행
 ## StatManager로 스탯 관리
@@ -60,7 +62,7 @@ func _ready() -> void:
 	add_to_group("player")
 
 	# EventBus 참조 획득
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
 
 	# StatManager 초기화
 	_init_stat_manager()
@@ -71,7 +73,7 @@ func _ready() -> void:
 
 ## StatManager 초기화
 func _init_stat_manager() -> void:
-	var StatManagerClass = load("res://_shared/scripts/progression/stat_manager.gd")
+	var StatManagerClass = ResourcePathsClass.load_resource(ResourcePathsClass.SCRIPT_STAT_MANAGER)
 	if StatManagerClass:
 		stat_manager = StatManagerClass.new()
 		# 기본 스탯 설정

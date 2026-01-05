@@ -1,6 +1,8 @@
 extends "res://_shared/scripts/player/player_base.gd"
 
 ## Test Game 플레이어
+
+const ResourcePathsClass = preload("res://_shared/scripts/core/resource_paths.gd")
 ## WeaponManager 기반 다중 무기 시스템, 지형 충돌, 애니메이션, 스킬 시스템
 
 const SkillManagerClass = preload("res://_shared/scripts/progression/skill_manager.gd")
@@ -130,7 +132,7 @@ func _setup_skill_selection_ui() -> void:
 
 	# 없으면 생성
 	if not skill_selection_ui:
-		var ui_scene = load("res://scenes/ui/skill_selection.tscn")
+		var ui_scene = ResourcePathsClass.load_scene(ResourcePathsClass.UI_SKILL_SELECTION)
 		if ui_scene:
 			skill_selection_ui = ui_scene.instantiate()
 			skill_selection_ui.add_to_group("skill_selection_ui")
@@ -323,9 +325,10 @@ func _update_weapon_stats() -> void:
 	if not weapon_manager or not stat_manager:
 		return
 
-	# StatManager 기본값 (수정자 계산용)
-	const BASE_DAMAGE: float = 1.0
-	const BASE_FIRE_RATE: float = 0.25
+	# GameConfig에서 기본값 가져오기 (수정자 계산용)
+	var config = Services.config
+	var BASE_DAMAGE: float = config.base_damage if config else 1.0
+	var BASE_FIRE_RATE: float = config.base_fire_rate if config else 0.25
 
 	# StatManager에서 무기 관련 스탯 가져오기
 	var damage_value = stat_manager.get_damage()
@@ -363,9 +366,15 @@ func _debug_print_stats() -> void:
 
 ## 보물상자 이벤트 구독
 func _setup_treasure_events() -> void:
-	var event_bus_node = get_node_or_null("/root/EventBus")
+	var event_bus_node = Services.event_bus
 	if event_bus_node:
 		event_bus_node.treasure_collected.connect(_on_treasure_collected)
+
+## 씬 정리 시 시그널 연결 해제 (메모리 누수 방지)
+func _exit_tree() -> void:
+	var event_bus_node = Services.event_bus
+	if event_bus_node and event_bus_node.treasure_collected.is_connected(_on_treasure_collected):
+		event_bus_node.treasure_collected.disconnect(_on_treasure_collected)
 
 ## 보물상자 획득 시 (EventBus 경유)
 func _on_treasure_collected(_chest: Node, player: Node) -> void:
