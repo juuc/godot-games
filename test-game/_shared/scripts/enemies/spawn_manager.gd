@@ -65,7 +65,7 @@ func _ready() -> void:
 	_base_enemies_per_spawn = enemies_per_spawn
 
 	# EventBus 참조
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
 
 	# EventBus 이벤트 구독
 	if event_bus:

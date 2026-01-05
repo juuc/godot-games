@@ -22,12 +22,6 @@ var weapon_instances: Array[Node2D] = []
 ## 무기 인스턴스의 부모 노드
 var weapon_parent: Node2D = null
 
-## EventBus 참조
-var event_bus: Node = null
-
-func _init() -> void:
-	event_bus = Engine.get_main_loop().root.get_node_or_null("/root/EventBus") if Engine.get_main_loop() else null
-
 ## 무기 풀 설정
 func set_weapon_pool(weapons: Array[WeaponData]) -> void:
 	weapon_pool = weapons

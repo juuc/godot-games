@@ -19,7 +19,7 @@ func _ready() -> void:
 	add_to_group("pickups")
 
 	# EventBus 참조
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
 
 	# 플레이어 찾기 (자석 효과용)
 	await get_tree().process_frame

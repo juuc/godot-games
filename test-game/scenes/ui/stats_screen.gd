@@ -51,7 +51,7 @@ func _setup_button_style() -> void:
 	back_button.add_theme_font_size_override("font_size", 20)
 
 func _populate_stats() -> void:
-	var stats_manager = get_node_or_null("/root/StatsManager")
+	var stats_manager = Services.stats_manager
 	if not stats_manager:
 		return
 

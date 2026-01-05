@@ -36,7 +36,7 @@ var aim_direction: Vector2 = Vector2.RIGHT
 
 func _ready() -> void:
 	# EventBus 참조
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
 
 	# 소유자 찾기
 	owner_node = get_parent()
