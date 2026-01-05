@@ -9,8 +9,12 @@ signal skill_acquired(skill, level: int)
 signal skill_upgraded(skill, new_level: int)
 signal selection_required(options: Array)
 
-## 최대 패시브 스킬 슬롯 수
-const MAX_PASSIVE_SLOTS: int = 3
+## 최대 패시브 스킬 슬롯 수 (GameConfig에서 가져옴)
+var max_passive_slots: int:
+	get:
+		if Services.config:
+			return Services.config.max_passive_slots
+		return 3
 
 ## 사용 가능한 모든 스킬 풀
 var available_skills: Array[SkillData] = []
@@ -106,7 +110,7 @@ func get_passive_count() -> int:
 
 ## 새 패시브 스킬 획득 가능 여부
 func can_acquire_passive() -> bool:
-	return get_passive_count() < MAX_PASSIVE_SLOTS
+	return get_passive_count() < max_passive_slots
 
 ## ID로 스킬 찾기
 func _get_skill_by_id(skill_id: String):
