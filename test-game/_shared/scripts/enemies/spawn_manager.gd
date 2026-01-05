@@ -431,3 +431,13 @@ func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBas
 func set_difficulty(difficulty_mult: float) -> void:
 	spawn_interval = max(0.5, 2.0 / difficulty_mult)
 	enemies_per_spawn = int(3 * difficulty_mult)
+
+## 씬 정리 시 시그널 연결 해제 (메모리 누수 방지)
+func _exit_tree() -> void:
+	if event_bus and is_instance_valid(event_bus):
+		if event_bus.player_spawned.is_connected(_on_player_spawned):
+			event_bus.player_spawned.disconnect(_on_player_spawned)
+		if event_bus.game_over.is_connected(_on_game_over):
+			event_bus.game_over.disconnect(_on_game_over)
+		if event_bus.game_restarted.is_connected(_on_game_restarted):
+			event_bus.game_restarted.disconnect(_on_game_restarted)
