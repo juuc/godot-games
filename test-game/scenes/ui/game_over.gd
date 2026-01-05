@@ -21,9 +21,8 @@ func _ready() -> void:
 	quit_button.pressed.connect(_on_quit_pressed)
 
 	# EventBus 연결
-	var event_bus = get_node_or_null("/root/EventBus")
-	if event_bus:
-		event_bus.game_over.connect(_on_game_over)
+	if Services.event_bus:
+		Services.event_bus.game_over.connect(_on_game_over)
 
 	# 시작 시 숨김
 	hide()
@@ -74,9 +73,8 @@ func _on_restart_pressed() -> void:
 	restart_requested.emit()
 
 	# GameManager로 재시작 (없으면 직접 처리)
-	var game_manager = get_node_or_null("/root/GameManager")
-	if game_manager:
-		game_manager.restart_game()
+	if Services.game_manager:
+		Services.game_manager.restart_game()
 	else:
 		get_tree().paused = false
 		get_tree().reload_current_scene()

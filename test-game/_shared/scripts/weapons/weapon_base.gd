@@ -36,7 +36,7 @@ var aim_direction: Vector2 = Vector2.RIGHT
 
 func _ready() -> void:
 	# EventBus 참조
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
 
 	# 소유자 찾기
 	owner_node = get_parent()
@@ -72,7 +72,7 @@ func _fire() -> void:
 	can_fire = false
 	cooldown_timer = _get_fire_rate()
 
-	var projectiles: Array = []
+	var projectiles: Array[Node2D] = []
 	var total_projectiles = weapon_data.projectiles_per_shot + additional_projectiles
 
 	# 발사 방향 계산

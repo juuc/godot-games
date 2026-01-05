@@ -11,25 +11,19 @@ signal weapons_changed
 const MAX_WEAPONS: int = 3
 
 ## 무기 풀 (선택 가능한 모든 무기)
-var weapon_pool: Array = []
+var weapon_pool: Array[WeaponData] = []
 
 ## 활성 무기 {weapon_id: {data: Resource, level: int}}
 var active_weapons: Dictionary = {}
 
 ## 무기 인스턴스 (실제 발사 담당)
-var weapon_instances: Array = []
+var weapon_instances: Array[Node2D] = []
 
 ## 무기 인스턴스의 부모 노드
 var weapon_parent: Node2D = null
 
-## EventBus 참조
-var event_bus: Node = null
-
-func _init() -> void:
-	event_bus = Engine.get_main_loop().root.get_node_or_null("/root/EventBus") if Engine.get_main_loop() else null
-
 ## 무기 풀 설정
-func set_weapon_pool(weapons: Array) -> void:
+func set_weapon_pool(weapons: Array[WeaponData]) -> void:
 	weapon_pool = weapons
 
 ## 무기 인스턴스 부모 노드 설정
@@ -131,8 +125,8 @@ func get_weapon_instances() -> Array:
 	return weapon_instances
 
 ## 레벨업 선택지용 옵션 생성
-func get_available_options() -> Array:
-	var options: Array = []
+func get_available_options() -> Array[Dictionary]:
+	var options: Array[Dictionary] = []
 
 	for weapon_data in weapon_pool:
 		var weapon_id = weapon_data.id

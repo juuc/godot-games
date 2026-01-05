@@ -17,7 +17,7 @@ func _ready() -> void:
 	add_to_group("pickups")
 
 	# EventBus 참조
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
 
 	# 초기 위치 저장 (부유 효과용)
 	initial_position = global_position

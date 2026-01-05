@@ -39,7 +39,7 @@ func _ready() -> void:
 	add_child(music_player)
 
 	# EventBus 연동
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
 	if event_bus:
 		_connect_event_bus()
 

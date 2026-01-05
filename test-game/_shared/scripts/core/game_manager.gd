@@ -27,8 +27,8 @@ var total_xp: int = 0
 var current_wave: int = 0
 
 # --- Countdown Timer ---
-const CYCLE_DURATION: float = 600.0  ## 10분 = 600초
-var remaining_time: float = CYCLE_DURATION  ## 남은 시간
+## cycle_duration은 Services.config에서 가져옴
+var remaining_time: float = 600.0  ## 초기값, _ready에서 재설정
 var cycle_count: int = 0  ## 완료된 사이클 수
 
 # timer_updated, cycle_completed는 EventBus를 통해 발행
@@ -51,11 +51,21 @@ var is_game_over: bool:
 var event_bus: Node = null
 
 func _ready() -> void:
-	# EventBus 찾기 (autoload로 등록된 경우)
-	event_bus = get_node_or_null("/root/EventBus")
+	# EventBus 찾기 (Services 경유)
+	event_bus = Services.event_bus
 
 	if event_bus:
 		_connect_events()
+
+	# GameConfig에서 사이클 시간 초기화
+	remaining_time = cycle_duration
+
+## GameConfig에서 사이클 시간 가져오기
+var cycle_duration: float:
+	get:
+		if Services.config:
+			return Services.config.cycle_duration
+		return 600.0  # 폴백
 
 func _connect_events() -> void:
 	# 플레이어 이벤트
@@ -120,7 +130,7 @@ func trigger_game_over() -> void:
 	var stats = get_final_stats()
 
 	# StatsManager에 결과 저장
-	var stats_manager = get_node_or_null("/root/StatsManager")
+	var stats_manager = Services.stats_manager
 	if stats_manager:
 		stats_manager.save_result(stats)
 
@@ -145,7 +155,7 @@ func _reset_stats() -> void:
 	total_xp = 0
 	current_wave = 0
 	player = null
-	remaining_time = CYCLE_DURATION
+	remaining_time = cycle_duration
 	cycle_count = 0
 	# 상태 초기화 (재시작 시 GAME_OVER에서 NONE으로)
 	current_state = GameState.NONE
@@ -188,7 +198,7 @@ func _update_countdown(delta: float) -> void:
 	remaining_time -= delta
 
 	if event_bus:
-		event_bus.timer_updated.emit(remaining_time, CYCLE_DURATION)
+		event_bus.timer_updated.emit(remaining_time, cycle_duration)
 
 	if remaining_time <= 0:
 		_complete_cycle()
@@ -196,7 +206,7 @@ func _update_countdown(delta: float) -> void:
 ## 사이클 완료
 func _complete_cycle() -> void:
 	cycle_count += 1
-	remaining_time = CYCLE_DURATION  # 타이머 리셋
+	remaining_time = cycle_duration  # 타이머 리셋
 
 	if event_bus:
 		event_bus.cycle_completed.emit(cycle_count)

@@ -2,6 +2,8 @@ class_name EnemyBase
 extends CharacterBody2D
 
 ## 모든 적의 기본 클래스
+
+const ResourcePathsClass = preload("res://_shared/scripts/core/resource_paths.gd")
 ## 체력, 이동, 데미지 처리를 담당합니다.
 ## EventBus를 통해 이벤트 발행
 
@@ -20,6 +22,7 @@ var event_bus: Node = null
 
 ## 넉백
 var knockback_velocity: Vector2 = Vector2.ZERO
+## knockback_decay는 GameConfig에서 가져옴 (_ready에서 초기화)
 var knockback_decay: float = 10.0
 
 ## 스프라이트 참조 (자식 노드에서 설정)
@@ -32,8 +35,9 @@ var animation_speed: float = 10.0  ## 초당 프레임 수
 ## 공격
 var is_attacking: bool = false
 var attack_timer: float = 0.0
-var attack_cooldown: float = 1.0  ## 공격 쿨다운 (초)
-var attack_range: float = 25.0  ## 공격 범위
+## attack_cooldown, attack_range는 GameConfig에서 가져옴 (_ready에서 초기화)
+var attack_cooldown: float = 1.0
+var attack_range: float = 25.0
 var has_dealt_damage: bool = false  ## 이번 공격에서 데미지를 줬는지
 
 ## 애니메이션 프레임 설정
@@ -42,9 +46,9 @@ var walk_frames_end: int = 5
 var attack_frames_start: int = 6
 var attack_frames_end: int = 9
 
-## Separation (적끼리 겹침 방지)
-var separation_radius: float = 20.0  ## 분리 감지 반경
-var separation_force: float = 80.0  ## 분리 힘
+## Separation (적끼리 겹침 방지) - GameConfig에서 가져옴 (_ready에서 초기화)
+var separation_radius: float = 20.0
+var separation_force: float = 80.0
 
 ## Elite 플래그 (거리 컬링 제외)
 var is_elite: bool = false
@@ -79,7 +83,10 @@ func _ready() -> void:
 	add_to_group("enemies")
 
 	# EventBus 참조 획득
-	event_bus = get_node_or_null("/root/EventBus")
+	event_bus = Services.event_bus
+
+	# GameConfig에서 설정값 로드
+	_load_config()
 
 	if enemy_data:
 		current_health = enemy_data.max_health
@@ -92,6 +99,19 @@ func _ready() -> void:
 	# 스폰 이벤트 발행
 	if event_bus:
 		event_bus.enemy_spawned.emit(self)
+
+## GameConfig에서 설정값 로드
+func _load_config() -> void:
+	var config = Services.config
+	if not config:
+		return
+
+	knockback_decay = config.knockback_decay
+	attack_cooldown = config.enemy_attack_cooldown
+	attack_range = config.enemy_attack_range
+	separation_radius = config.enemy_separation_radius
+	separation_force = config.enemy_separation_force
+	animation_speed = config.enemy_animation_speed
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -304,11 +324,8 @@ var health_pickup_scene: PackedScene = null
 ## 보물상자 씬
 var treasure_chest_scene: PackedScene = null
 
-## 체력 픽업 드롭 설정 (EnemyData에서 읽거나 기본값 사용)
-const DEFAULT_HEALTH_DROP_BASE_CHANCE: float = 0.05
-const DEFAULT_HEALTH_DROP_LOW_HP_CHANCE: float = 0.20
-const DEFAULT_HEALTH_DROP_LOW_HP_THRESHOLD: float = 0.3
-const DEFAULT_TREASURE_DROP_CHANCE: float = 0.01
+## 체력 픽업 드롭 설정 (GameConfig 또는 EnemyData에서 읽음)
+## 기본값은 GameConfig, EnemyData가 있으면 EnemyData 우선
 
 ## 드롭 아이템 스폰 (자식에서 오버라이드 가능)
 func _spawn_drops() -> void:
@@ -327,11 +344,13 @@ func _spawn_drops() -> void:
 
 ## 체력 픽업 드롭 시도
 func _try_spawn_health_pickup() -> void:
-	# EnemyData에서 드롭 설정 읽기 (없으면 기본값 사용)
-	var base_chance = DEFAULT_HEALTH_DROP_BASE_CHANCE
-	var low_hp_chance = DEFAULT_HEALTH_DROP_LOW_HP_CHANCE
-	var low_hp_threshold = DEFAULT_HEALTH_DROP_LOW_HP_THRESHOLD
+	# GameConfig에서 기본값 가져오기
+	var config = Services.config
+	var base_chance = config.health_drop_base_chance if config else 0.05
+	var low_hp_chance = config.health_drop_low_hp_chance if config else 0.20
+	var low_hp_threshold = config.health_drop_low_hp_threshold if config else 0.3
 
+	# EnemyData가 있으면 덮어쓰기
 	if enemy_data:
 		base_chance = enemy_data.health_drop_base_chance
 		low_hp_chance = enemy_data.health_drop_low_hp_chance
@@ -353,7 +372,7 @@ func _try_spawn_health_pickup() -> void:
 func _spawn_health_pickup() -> void:
 	# 씬 로드 (캐시)
 	if not health_pickup_scene:
-		health_pickup_scene = load("res://scenes/pickups/health_pickup.tscn")
+		health_pickup_scene = ResourcePathsClass.load_scene(ResourcePathsClass.PICKUP_HEALTH)
 
 	if not health_pickup_scene:
 		return
@@ -367,7 +386,7 @@ func _spawn_health_pickup() -> void:
 func _spawn_xp_gem() -> void:
 	# 씬 로드 (캐시)
 	if not xp_gem_scene:
-		xp_gem_scene = load("res://scenes/pickups/xp_gem.tscn")
+		xp_gem_scene = ResourcePathsClass.load_scene(ResourcePathsClass.PICKUP_XP_GEM)
 
 	if not xp_gem_scene:
 		return
@@ -380,7 +399,8 @@ func _spawn_xp_gem() -> void:
 
 ## 보물상자 드롭 시도
 func _try_spawn_treasure_chest() -> void:
-	var chance = DEFAULT_TREASURE_DROP_CHANCE
+	var config = Services.config
+	var chance = config.treasure_drop_chance if config else 0.01
 
 	if enemy_data and "treasure_drop_chance" in enemy_data:
 		chance = enemy_data.treasure_drop_chance
@@ -392,7 +412,7 @@ func _try_spawn_treasure_chest() -> void:
 func _spawn_treasure_chest() -> void:
 	# 씬 로드 (캐시)
 	if not treasure_chest_scene:
-		treasure_chest_scene = load("res://scenes/pickups/treasure_chest.tscn")
+		treasure_chest_scene = ResourcePathsClass.load_scene(ResourcePathsClass.PICKUP_TREASURE)
 
 	if not treasure_chest_scene:
 		return
@@ -413,7 +433,7 @@ var damage_popup_scene: PackedScene = null
 func _spawn_damage_popup(amount: float) -> void:
 	# 씬 로드 (캐시)
 	if not damage_popup_scene:
-		damage_popup_scene = load("res://scenes/ui/damage_popup.tscn")
+		damage_popup_scene = ResourcePathsClass.load_scene(ResourcePathsClass.UI_DAMAGE_POPUP)
 
 	if not damage_popup_scene:
 		return

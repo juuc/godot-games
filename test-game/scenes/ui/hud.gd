@@ -3,11 +3,36 @@ extends "res://_shared/scripts/ui/hud_base.gd"
 ## Test Game HUD
 ## 체력바, XP바, 레벨, 무기/패시브 슬롯 표시
 
-const MAX_SLOTS = 3
-const SLOT_SIZE = Vector2(36, 36)
-const WEAPON_COLOR = Color(1.0, 0.6, 0.2)
-const PASSIVE_COLOR = Color(0.3, 0.6, 1.0)
-const EMPTY_COLOR = Color(0.2, 0.2, 0.2, 0.5)
+## 슬롯 설정은 GameConfig에서 가져옴
+var MAX_SLOTS: int:
+	get:
+		if Services.config:
+			return Services.config.max_weapon_slots
+		return 3
+
+var SLOT_SIZE: Vector2:
+	get:
+		if Services.config:
+			return Services.config.slot_size
+		return Vector2(36, 36)
+
+var WEAPON_COLOR: Color:
+	get:
+		if Services.config:
+			return Services.config.weapon_slot_color
+		return Color(1.0, 0.6, 0.2)
+
+var PASSIVE_COLOR: Color:
+	get:
+		if Services.config:
+			return Services.config.passive_slot_color
+		return Color(0.3, 0.6, 1.0)
+
+var EMPTY_COLOR: Color:
+	get:
+		if Services.config:
+			return Services.config.empty_slot_color
+		return Color(0.2, 0.2, 0.2, 0.5)
 
 var weapon_slots: Array[PanelContainer] = []
 var passive_slots: Array[PanelContainer] = []
@@ -25,12 +50,11 @@ func _setup_ui() -> void:
 	timer_label = $TimerContainer/TimerLabel
 
 	# EventBus를 통해 타이머 이벤트 구독
-	var event_bus = get_node_or_null("/root/EventBus")
-	if event_bus:
-		event_bus.timer_updated.connect(_on_timer_updated)
+	if Services.event_bus:
+		Services.event_bus.timer_updated.connect(_on_timer_updated)
 
 	# GameManager 참조 (다른 용도)
-	game_manager = get_node_or_null("/root/GameManager")
+	game_manager = Services.game_manager
 
 	# 슬롯 생성
 	_create_slots()
@@ -225,6 +249,38 @@ func _clear_slot(slot: PanelContainer, color: Color) -> void:
 	var level_label_node = slot.get_node("VBoxContainer/Level")
 	level_label_node.text = ""
 
+## 플레이어 시그널 연결 해제 (오버라이드)
+func _disconnect_player_signals() -> void:
+	# 부모 시그널 해제
+	super._disconnect_player_signals()
+
+	# EventBus 시그널 해제
+	if Services.event_bus and Services.event_bus.timer_updated.is_connected(_on_timer_updated):
+		Services.event_bus.timer_updated.disconnect(_on_timer_updated)
+
+	if not player or not is_instance_valid(player):
+		return
+
+	# WeaponManager 시그널 해제
+	if player.get("weapon_manager"):
+		var wm = player.weapon_manager
+		if wm and is_instance_valid(wm):
+			if wm.has_signal("weapon_acquired") and wm.weapon_acquired.is_connected(_on_weapon_acquired):
+				wm.weapon_acquired.disconnect(_on_weapon_acquired)
+			if wm.has_signal("weapon_upgraded") and wm.weapon_upgraded.is_connected(_on_weapon_upgraded):
+				wm.weapon_upgraded.disconnect(_on_weapon_upgraded)
+			if wm.has_signal("weapons_changed") and wm.weapons_changed.is_connected(_update_weapon_slots):
+				wm.weapons_changed.disconnect(_update_weapon_slots)
+
+	# SkillManager 시그널 해제
+	if player.get("skill_manager"):
+		var sm = player.skill_manager
+		if sm and is_instance_valid(sm):
+			if sm.has_signal("skill_acquired") and sm.skill_acquired.is_connected(_on_passive_changed):
+				sm.skill_acquired.disconnect(_on_passive_changed)
+			if sm.has_signal("skill_upgraded") and sm.skill_upgraded.is_connected(_on_passive_changed):
+				sm.skill_upgraded.disconnect(_on_passive_changed)
+
 ## 타이머 업데이트
 func _on_timer_updated(remaining: float, _total: float) -> void:
 	if timer_label:
@@ -234,11 +290,14 @@ func _on_timer_updated(remaining: float, _total: float) -> void:
 		var seconds := total_seconds % 60
 		timer_label.text = "%d:%02d" % [minutes, seconds]
 
-		# 1분 이하면 빨간색
-		if remaining <= 60:
+		# 타이머 색상 (GameConfig 임계값 사용)
+		var config = Services.config
+		var red_threshold = config.warning_threshold_red if config else 60.0
+		var yellow_threshold = config.warning_threshold_yellow if config else 180.0
+
+		if remaining <= red_threshold:
 			timer_label.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
-		# 3분 이하면 노란색
-		elif remaining <= 180:
+		elif remaining <= yellow_threshold:
 			timer_label.add_theme_color_override("font_color", Color(1, 1, 0.3))
 		else:
 			timer_label.add_theme_color_override("font_color", Color.WHITE)

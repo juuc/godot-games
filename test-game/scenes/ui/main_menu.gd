@@ -14,9 +14,8 @@ func _ready() -> void:
 	get_tree().paused = false
 
 	# GameManager 상태 초기화
-	var game_manager = get_node_or_null("/root/GameManager")
-	if game_manager:
-		game_manager._reset_stats()
+	if Services.game_manager:
+		Services.game_manager._reset_stats()
 
 	# 버튼 연결
 	start_button.pressed.connect(_on_start_pressed)

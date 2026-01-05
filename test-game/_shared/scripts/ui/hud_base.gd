@@ -61,3 +61,19 @@ func _update_xp(current: int, required: int) -> void:
 func _update_level(new_level: int) -> void:
 	if level_label:
 		level_label.text = "Lv.%d" % new_level
+
+## 씬 정리 시 시그널 연결 해제
+func _exit_tree() -> void:
+	_disconnect_player_signals()
+
+## 플레이어 시그널 연결 해제 (메모리 누수 방지)
+func _disconnect_player_signals() -> void:
+	if not player or not is_instance_valid(player):
+		return
+
+	if player.has_signal("health_changed") and player.health_changed.is_connected(_update_health):
+		player.health_changed.disconnect(_update_health)
+	if player.has_signal("xp_changed") and player.xp_changed.is_connected(_update_xp):
+		player.xp_changed.disconnect(_update_xp)
+	if player.has_signal("level_up") and player.level_up.is_connected(_update_level):
+		player.level_up.disconnect(_update_level)
