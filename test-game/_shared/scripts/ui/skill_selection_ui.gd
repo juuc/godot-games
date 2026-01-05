@@ -12,7 +12,7 @@ signal selection_cancelled()  ## TODO: 취소 기능 구현 시 사용
 var skill_manager
 
 ## 현재 표시된 옵션들
-var current_options: Array = []
+var current_options: Array[Dictionary] = []
 
 ## UI 요소 (자식에서 설정)
 var container: Control

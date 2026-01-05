@@ -13,7 +13,7 @@ signal selection_required(options: Array)
 const MAX_PASSIVE_SLOTS: int = 3
 
 ## 사용 가능한 모든 스킬 풀
-var available_skills: Array = []
+var available_skills: Array[SkillData] = []
 
 ## 획득한 스킬 {skill_id: level}
 var acquired_skills: Dictionary = {}
@@ -22,7 +22,7 @@ var acquired_skills: Dictionary = {}
 var selection_count: int = 3
 
 ## 스킬 풀 설정
-func set_skill_pool(skills: Array) -> void:
+func set_skill_pool(skills: Array[SkillData]) -> void:
 	available_skills = skills
 
 ## 스킬 획득/업그레이드
@@ -49,9 +49,9 @@ func has_skill(skill_id: String) -> bool:
 	return acquired_skills.has(skill_id)
 
 ## 레벨업 시 호출 - 선택지 생성
-func request_skill_selection() -> Array:
-	var options: Array = []
-	var candidates: Array = []
+func request_skill_selection() -> Array[SkillData]:
+	var options: Array[SkillData] = []
+	var candidates: Array[SkillData] = []
 
 	# 업그레이드 가능한 스킬 + 새로 획득 가능한 스킬
 	for skill in available_skills:
@@ -116,8 +116,8 @@ func _get_skill_by_id(skill_id: String):
 	return null
 
 ## 패시브 스킬만 선택지로 반환 (통합 선택 UI용)
-func get_passive_options() -> Array:
-	var options: Array = []
+func get_passive_options() -> Array[Dictionary]:
+	var options: Array[Dictionary] = []
 
 	for skill in available_skills:
 		# PASSIVE 타입만 (skill_type == 0)

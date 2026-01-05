@@ -12,7 +12,7 @@ signal stats_changed
 var base_stats: Dictionary = {}
 
 ## 활성 수정자 목록
-var modifiers: Array = []
+var modifiers: Array[StatModifierClass] = []
 
 ## 캐시된 최종 값
 var _cached_values: Dictionary = {}

@@ -72,7 +72,7 @@ func _fire() -> void:
 	can_fire = false
 	cooldown_timer = _get_fire_rate()
 
-	var projectiles: Array = []
+	var projectiles: Array[Node2D] = []
 	var total_projectiles = weapon_data.projectiles_per_shot + additional_projectiles
 
 	# 발사 방향 계산

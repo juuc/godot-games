@@ -53,7 +53,7 @@ var poi_update_timer: float = 0.0
 var last_terrain_center: Vector2 = Vector2.INF
 
 ## 활성 POI 목록 [{type, position, node, config}]
-var active_pois: Array = []
+var active_pois: Array[Dictionary] = []
 
 ## 수동 등록된 POI {node: poi_data}
 var registered_pois: Dictionary = {}

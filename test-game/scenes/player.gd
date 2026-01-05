@@ -68,9 +68,9 @@ func _setup_weapon() -> void:
 	weapon_manager.set_weapon_parent($GunPivot)
 
 	# 무기 풀 로드
-	var weapons: Array = []
+	var weapons: Array[WeaponData] = []
 	for path in weapon_paths:
-		var weapon_data = load(path)
+		var weapon_data: WeaponData = load(path)
 		if weapon_data:
 			weapons.append(weapon_data)
 	weapon_manager.set_weapon_pool(weapons)
@@ -108,9 +108,9 @@ func _setup_skill_system() -> void:
 	skill_manager = SkillManagerClass.new()
 
 	# 스킬 풀 로드
-	var skills: Array = []
+	var skills: Array[SkillData] = []
 	for path in skill_paths:
-		var skill = load(path)
+		var skill: SkillData = load(path)
 		if skill:
 			skills.append(skill)
 	skill_manager.set_skill_pool(skills)
@@ -262,7 +262,7 @@ func _on_level_up() -> void:
 	print("LEVEL UP! Now level ", current_level)
 
 	# 무기 + 패시브 통합 선택지 생성
-	var combined_options: Array = []
+	var combined_options: Array[Dictionary] = []
 
 	# 무기 옵션 추가
 	if weapon_manager:
@@ -378,7 +378,7 @@ func on_treasure_collected() -> void:
 
 ## 보물상자 선택 UI 표시
 func _show_treasure_selection() -> void:
-	var options: Array = []
+	var options: Array[Dictionary] = []
 
 	# 무기 옵션
 	if weapon_manager:

@@ -118,7 +118,7 @@ func _cull_distant_enemies(count_to_cull: int) -> int:
 		return 0
 
 	# non-elite 적들을 거리순으로 정렬
-	var enemies_with_distance: Array = []
+	var enemies_with_distance: Array[Dictionary] = []
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if not is_instance_valid(enemy):
 			continue
