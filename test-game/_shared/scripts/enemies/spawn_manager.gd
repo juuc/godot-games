@@ -351,12 +351,8 @@ func _on_enemy_died(enemy: EnemyBase, pos: Vector2) -> void:
 	else:
 		current_enemy_count -= 1
 	enemy_died.emit(enemy, pos)
-
-	# EventBus로도 발행 (EnemyBase에서 이미 발행하지만, 로컬 시그널 구독자용)
-	# 참고: xp_value는 enemy.enemy_data에서 가져옴
-	var xp_value = enemy.enemy_data.xp_value if enemy.enemy_data else 0
-	if event_bus:
-		event_bus.enemy_killed.emit(enemy, pos, xp_value)
+	# NOTE: EventBus.enemy_killed는 EnemyBase._die()에서 이미 발행됨
+	# 여기서 중복 발행하면 GameManager.kill_count가 2배로 증가하는 버그 발생
 
 ## 모든 적 제거
 func clear_all_enemies() -> void:
