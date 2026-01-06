@@ -11,6 +11,8 @@ const DifficultyScalerClass = preload("res://_shared/scripts/enemies/difficulty_
 signal enemy_spawned(enemy: EnemyBase)
 signal enemy_died(enemy: EnemyBase, position: Vector2)
 signal wave_changed(wave: int, health_mult: float, damage_mult: float)
+signal boss_spawned(boss: EnemyBase)
+signal boss_defeated(boss: EnemyBase, position: Vector2)
 
 @export_group("Spawn Settings")
 @export var enemy_data_list: Array[EnemyData]  ## 스폰할 적 종류
@@ -30,6 +32,10 @@ signal wave_changed(wave: int, health_mult: float, damage_mult: float)
 @export var elite_spawn_interval: float = 60.0  ## Elite 스폰 간격 (초)
 @export var elite_stat_multiplier: float = 3.0  ## Elite 스탯 배수
 
+@export_group("Boss Settings")
+@export var boss_data: EnemyData  ## 보스 데이터 (is_boss=true인 EnemyData)
+@export var boss_spawn_interval: float = 300.0  ## 보스 스폰 간격 (초, 기본 5분)
+
 @export_group("Spawn Area")
 @export var min_spawn_distance: float = 400.0  ## 최소 스폰 거리
 @export var max_spawn_distance: float = 550.0  ## 최대 스폰 거리
@@ -42,8 +48,10 @@ signal wave_changed(wave: int, health_mult: float, damage_mult: float)
 
 var spawn_timer: float = 0.0
 var elite_spawn_timer: float = 0.0  ## Elite 스폰 타이머
+var boss_spawn_timer: float = 0.0  ## Boss 스폰 타이머
 var current_enemy_count: int = 0  ## 일반 적 수
 var current_elite_count: int = 0  ## 엘리트 적 수 (별도 관리)
+var current_boss_count: int = 0  ## 보스 적 수 (별도 관리)
 var is_spawning_enabled: bool = true
 
 ## 난이도 스케일러 (웨이브/스케일링 로직 위임)
@@ -96,8 +104,10 @@ func _on_game_restarted() -> void:
 	is_spawning_enabled = true
 	current_enemy_count = 0
 	current_elite_count = 0
+	current_boss_count = 0
 	spawn_timer = 0.0
 	elite_spawn_timer = 0.0
+	boss_spawn_timer = 0.0
 
 	# 난이도 스케일러 초기화
 	difficulty_scaler.reset()
@@ -146,6 +156,7 @@ func _process(delta: float) -> void:
 
 	spawn_timer += delta
 	elite_spawn_timer += delta
+	boss_spawn_timer += delta
 
 	# 난이도 스케일링 업데이트 (웨이브 체크 포함)
 	var spawn_settings: Dictionary = {}
@@ -165,6 +176,11 @@ func _process(delta: float) -> void:
 	if elite_spawn_timer >= elite_spawn_interval:
 		elite_spawn_timer = 0.0
 		_spawn_elite_enemy()
+
+	# Boss 스폰 (시간 기반)
+	if boss_spawn_timer >= boss_spawn_interval and boss_data:
+		boss_spawn_timer = 0.0
+		_spawn_boss()
 
 func _spawn_enemies(count: int) -> void:
 	if enemy_data_list.is_empty():
@@ -282,6 +298,7 @@ func clear_all_enemies() -> void:
 		enemy.queue_free()
 	current_enemy_count = 0
 	current_elite_count = 0
+	current_boss_count = 0
 
 ## 자동 Elite 스폰 (타이머 기반)
 func _spawn_elite_enemy() -> void:
@@ -348,6 +365,74 @@ func spawn_elite(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBas
 		event_bus.enemy_spawned.emit(enemy)
 
 	return enemy
+
+## 보스 스폰
+func _spawn_boss() -> void:
+	if not boss_data or not boss_data.scene:
+		return
+	
+	var boss = spawn_boss(boss_data)
+	if boss:
+		print("[Boss Spawn] %s spawned at wave %d (game time: %.0fs)" % [
+			boss_data.enemy_name,
+			difficulty_scaler.get_current_wave(),
+			difficulty_scaler.get_game_time()
+		])
+
+## 보스 스폰 (공개 메서드 - 외부에서 호출 가능)
+func spawn_boss(data: EnemyData, spawn_pos: Vector2 = Vector2.ZERO) -> EnemyBase:
+	if not data or not data.scene:
+		return null
+	
+	# 위치 결정 (walkable 체크 포함)
+	var final_pos := spawn_pos
+	if spawn_pos == Vector2.ZERO and player:
+		var found_valid_pos := false
+		for _attempt in range(max_spawn_attempts):
+			var angle = randf() * TAU
+			var distance = randf_range(min_spawn_distance, max_spawn_distance)
+			var pos = player.global_position + Vector2.RIGHT.rotated(angle) * distance
+			
+			if _is_position_walkable(pos):
+				final_pos = pos
+				found_valid_pos = true
+				break
+		
+		# 위치를 못 찾으면 스폰 포기
+		if not found_valid_pos:
+			return null
+	
+	var boss = data.scene.instantiate() as EnemyBase
+	if not boss:
+		return null
+	
+	boss.enemy_data = data
+	boss.died.connect(_on_boss_died)
+	
+	_get_spawn_container().add_child(boss)
+	boss.global_position = final_pos
+	
+	if player:
+		boss.set_target(player)
+	
+	# 난이도 스케일링 적용
+	if enable_difficulty_scaling:
+		difficulty_scaler.apply_scaling_to_enemy(boss)
+	
+	current_boss_count += 1
+	boss_spawned.emit(boss)
+	
+	if event_bus and event_bus.has_signal("boss_spawned"):
+		event_bus.boss_spawned.emit(boss)
+	
+	return boss
+
+func _on_boss_died(boss: EnemyBase, pos: Vector2) -> void:
+	current_boss_count -= 1
+	boss_defeated.emit(boss, pos)
+	
+	if event_bus and event_bus.has_signal("boss_defeated"):
+		event_bus.boss_defeated.emit(boss, pos)
 
 ## 난이도에 따른 스폰 간격 조정
 func set_difficulty(difficulty_mult: float) -> void:

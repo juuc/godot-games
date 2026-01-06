@@ -20,6 +20,9 @@ const PICKUP_XP_GEM := "res://scenes/pickups/xp_gem.tscn"
 const PICKUP_HEALTH := "res://scenes/pickups/health_pickup.tscn"
 const PICKUP_TREASURE := "res://scenes/pickups/treasure_chest.tscn"
 
+# --- Enemy Scenes ---
+const ENEMY_PROJECTILE := "res://scenes/enemies/enemy_projectile.tscn"
+
 # --- Config Resources ---
 const CONFIG_WORLD := "res://resources/world_config.tres"
 const CONFIG_GAME := "res://resources/game_config.tres"

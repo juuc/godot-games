@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://_shared/scripts/enemies/enemy_data.gd" id="1_data"]
+[ext_resource type="PackedScene" uid="uid://boss_enemy_001" path="res://scenes/enemies/boss_enemy.tscn" id="2_scene"]
+[ext_resource type="PackedScene" uid="uid://enemy_projectile_001" path="res://scenes/enemies/enemy_projectile.tscn" id="3_projectile"]
+
+[resource]
+script = ExtResource("1_data")
+enemy_name = "Giant Crab Boss"
+scene = ExtResource("2_scene")
+is_boss = true
+max_health = 100.0
+move_speed = 25.0
+damage = 15.0
+knockback_resistance = 0.5
+attack_type = 1
+attack_range = 200.0
+attack_cooldown = 1.5
+projectile_scene = ExtResource("3_projectile")
+projectile_speed = 220.0
+stop_to_attack = true
+xp_value = 50
+drop_chance = 1.0
+health_drop_base_chance = 0.5
+health_drop_low_hp_chance = 1.0
+health_drop_low_hp_threshold = 0.3
+treasure_drop_chance = 0.5
+health_scale = 1.5
+damage_scale = 1.2
+boss_scale = 2.0
+boss_phases = 2
+phase_health_thresholds = [0.5]
