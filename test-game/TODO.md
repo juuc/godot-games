@@ -1,6 +1,6 @@
 # Test Game - TODO
 
-> **Last Updated**: 2024-12-31
+> **Last Updated**: 2025-01-06
 
 ## Architecture Overview
 
@@ -16,43 +16,39 @@
 │    Player     │    │   Enemies     │    │      UI       │
 │ ┌───────────┐ │    │ ┌───────────┐ │    │ ┌───────────┐ │
 │ │StatManager│ │    │ │SpawnMgr   │ │    │ │    HUD    │ │
-│ │WeaponMgr  │ │    │ │Separation │ │    │ │ Minimap   │ │
-│ │SkillMgr   │ │    │ │Culling    │ │    │ │SkillSelect│ │
-│ └───────────┘ │    │ │Elite      │ │    │ │ GameOver  │ │
+│ │WeaponMgr  │ │    │ │AttackCtrl │ │    │ │ Minimap   │ │
+│ │SkillMgr   │ │    │ │BossCtrl   │ │    │ │SkillSelect│ │
+│ └───────────┘ │    │ │Projectile │ │    │ │ GameOver  │ │
 └───────────────┘    └───────────────┘    └───────────────┘
 ```
 
 ---
 
-## Current Sprint: 핵심 게임루프 완성
+## Current Sprint: 폴리시 & 컨텐츠
 
-### P0: Critical (게임 플레이 가능)
+### P1: High (핵심 컨텐츠) ✅ 완료
 
-- [x] ~~색깔 렌더링 버그~~ - EntityLayer로 해결
-- [x] ~~적 겹침 문제~~ - Separation Steering 구현
-- [x] ~~먼 적 무한 누적~~ - Distance Culling 구현
-- [x] ~~Elite 시스템 기반~~ - is_elite 플래그, 별도 카운트
-- [x] ~~게임오버 → 재시작 플로우~~ - GameManager + GameOver UI 연동 완료
-- [x] ~~웨이브/시간 기반 난이도~~ - SpawnManager 30초 간격, 체력/데미지 스케일링
-
-### P1: High (재미 요소)
-
-- [x] ~~회복 아이템 드롭~~ - 기본 5%, 체력 30% 이하 시 20% 확률
-- [x] ~~보물상자 드롭~~ - 1% 확률, 접촉 시 무기/패시브 선택 UI 표시
-- [ ] 적 다양화
-  - [ ] 원거리 공격 적
-  - [x] ~~Elite 적 구현~~ - 60초마다 스폰, 스탯 3배, 미니맵 깜빡임
-  - [ ] 보스 적 (5분마다 등장)
-- [ ] 무기 다양화
-  - [ ] 샷건 무기 데이터 추가
-  - [ ] 대검(슬래시) 무기 구현
-  - [ ] 관통탄 (pierce count)
+- [x] 적 다양화
+  - [x] 원거리 공격 적 (발사체 공격, 파란 크랩)
+  - [x] Elite 적 (60초마다 스폰, 스탯 3배)
+  - [x] 보스 적 (60초마다 등장, 2페이즈, 원거리)
+- [x] 무기 다양화
+  - [x] 샷건 (부채꼴 발사)
+  - [x] 대검/슬래시 무기
+  - [x] 머신건, 스나이퍼
+  - [x] 관통탄 (pierce_count)
+- [x] 회복 아이템 드롭 (기본 5%, 저체력 20%)
+- [x] 보물상자 드롭 (1% 확률)
+- [x] 레벨업 무적 시간 (2초)
 
 ### P2: Medium (폴리시)
 
-- [x] ~~데미지 숫자 팝업~~ - 팡팡 튀는 타격감 효과
-- [ ] 킬/시간 통계 UI
-- [ ] 레벨업 시 무적 시간 (2초)
+- [ ] **지형 개선 (다중 노이즈)** ⭐ 우선순위 높음
+  - [ ] 고도(elevation) 노이즈 추가
+  - [ ] 습도(moisture) 노이즈 추가
+  - [ ] 다양한 생물군계 조합
+  - [ ] 강/호수 생성
+- [ ] 킬/시간 통계 UI (게임 중 표시)
 - [ ] 무기/패시브 슬롯 HUD 표시
 - [ ] 사운드
   - [ ] 레벨업 효과음
@@ -62,10 +58,8 @@
 
 ### P3: Low (나중에)
 
-- [x] ~~메인 메뉴~~ - StatsManager + 통계 화면 포함
 - [ ] 캐릭터 선택
 - [ ] 메타 진행 (영구 업그레이드)
-- [ ] 지형 개선 (다중 노이즈)
 - [ ] 업적 시스템
 
 ---
@@ -75,9 +69,11 @@
 ### Core Systems
 | 시스템 | 파일 | 설명 |
 |--------|------|------|
-| EventBus | `core/event_bus.gd` | 전역 이벤트 버스 |
+| EventBus | `core/event_bus.gd` | 전역 이벤트 버스 (보스 시그널 포함) |
 | GameManager | `core/game_manager.gd` | 게임 상태 관리 |
-| StatsManager | `core/stats_manager.gd` | 통계 저장/로드 (user://stats.json) |
+| StatsManager | `core/stats_manager.gd` | 통계 저장/로드 |
+| GameConfig | `core/game_config.gd` | 전역 설정 |
+| ResourcePaths | `core/resource_paths.gd` | 리소스 경로 상수 |
 
 ### Player Systems
 | 시스템 | 파일 | 설명 |
@@ -91,24 +87,28 @@
 ### Weapon Systems
 | 시스템 | 파일 | 설명 |
 |--------|------|------|
-| WeaponBase | `weapons/weapon_base.gd` | 무기 로직, 쿨다운 |
+| WeaponBase | `weapons/weapon_base.gd` | 무기 로직, 쿨다운, pierce_count |
 | WeaponData | `weapons/weapon_data.gd` | 무기 데이터 리소스 |
 | MeleeWeaponBase | `weapons/melee_weapon_base.gd` | 근접 무기 베이스 |
 | SlashEffect | `weapons/slash_effect.gd` | 슬래시 이펙트 |
-| Projectile | `weapons/projectile.gd` | 발사체 |
+| Projectile | `weapons/projectile.gd` | 발사체 (관통 지원) |
 
 ### Enemy Systems
 | 시스템 | 파일 | 설명 |
 |--------|------|------|
-| EnemyBase | `enemies/enemy_base.gd` | 추적, 공격, 드롭 |
-| EnemyData | `enemies/enemy_data.gd` | 적 데이터 리소스 |
-| SpawnManager | `enemies/spawn_manager.gd` | 스폰, 컬링, Elite 지원 |
-| Separation | `enemy_base.gd` | 적끼리 겹침 방지 |
+| EnemyBase | `enemies/enemy_base.gd` | 추적, 공격, 드롭, 보스 지원 |
+| EnemyData | `enemies/enemy_data.gd` | AttackType enum, 보스 설정 |
+| EnemyAttackController | `enemies/enemy_attack_controller.gd` | 근접/원거리 공격 위임 |
+| EnemyProjectile | `enemies/enemy_projectile.gd` | 적 발사체 |
+| BossController | `enemies/boss_controller.gd` | 페이즈 관리, 분노 상태 |
+| SpawnManager | `enemies/spawn_manager.gd` | 스폰, 컬링, Elite, 보스 |
+| EnemyDropController | `enemies/enemy_drop_controller.gd` | 드롭 로직 |
+| DifficultyScaler | `enemies/difficulty_scaler.gd` | 난이도 스케일링 |
 
 ### UI Systems
 | 시스템 | 파일 | 설명 |
 |--------|------|------|
-| MainMenu | `ui/main_menu.gd` | 메인 메뉴 (시작, 통계, 종료) |
+| MainMenu | `ui/main_menu.gd` | 메인 메뉴 |
 | StatsScreen | `ui/stats_screen.gd` | 누적 통계 표시 |
 | HUD | `ui/hud_base.gd` | 체력바, XP바 |
 | Minimap | `ui/minimap_base.gd` | 미니맵 + POI |
@@ -118,92 +118,85 @@
 ### World Systems
 | 시스템 | 파일 | 설명 |
 |--------|------|------|
-| WorldGenerator | `world_generator/world_generator.gd` | 무한 청크 생성 |
+| WorldGenerator | `world_generator/world_generator.gd` | 무한 청크 생성 (단일 노이즈) |
 | WorldConfig | `world_generator/world_config.gd` | 월드 설정 리소스 |
+| ChunkManager | `scenes/level/chunk_manager.gd` | 청크 로딩/언로딩 |
+| AutotileSolver | `scenes/level/autotile_solver.gd` | 오토타일 계산 |
 
 ---
 
 ## 최근 변경 이력
 
+### 2025-01-06
+- [x] 원거리 적 구현 (EnemyAttackController, EnemyProjectile)
+- [x] 보스 적 구현 (BossController, 페이즈 시스템)
+- [x] EnemyData 확장 (AttackType enum, 보스 설정)
+- [x] SpawnManager 보스 스폰 지원
+- [x] EventBus 보스 시그널 추가
+
 ### 2024-12-31
-- [x] 메인 메뉴 시스템 구현 (Start Game, Statistics, Quit)
-- [x] StatsManager 구현 (통계 저장/로드, user://stats.json)
-- [x] 통계 화면 구현 (누적 통계, 최근 게임 5개)
-- [x] 게임오버 → 메인 메뉴 연결 (버튼 변경)
-- [x] 데미지 숫자 팝업 구현 (팡팡 튀는 타격감)
+- [x] 메인 메뉴 시스템 구현
+- [x] StatsManager 구현
+- [x] 데미지 숫자 팝업 구현
 
 ### 2024-12-30
-- [x] Elite 적 구현 (60초마다, 스탯 3배, 미니맵 표시)
-- [x] 보물상자 드롭 구현 (1% 확률, 무기/패시브 선택 UI)
-- [x] 게임오버 → 재시작 플로우 검증 (이미 구현됨)
-- [x] 웨이브/난이도 시스템 구현 (30초 간격, 체력/데미지 스케일링)
-- [x] 체력 픽업 드롭 구현 (기본 5%, 저체력 시 20%)
-- [x] EntityLayer로 인한 타일 충돌 버그 수정
-- [x] 10분 카운트다운 타이머 구현
-- [x] 로딩 화면 구현
-- [x] 데미지업 스킬 발사속도 버그 수정 (fire_rate 분리)
-- [x] 아키텍처 리팩토링:
-  - Timer 시그널 → EventBus 이동
-  - 드롭 설정 → EnemyData 이동
-  - Walkable 설정 → WorldConfig 이동
-- [x] attack_speed 스킬 수정 (PASSIVE 타입, PERCENT 모드)
-- [x] 경고 메시지 정리 (모든 컴파일 경고 해결):
-  - EventBus 시그널 warning_ignore 추가
-  - Integer division 경고 수정
-  - 파라미터 섀도잉 수정 (is_visible → visible_state)
-  - skill_selection_ui 미사용 시그널 정리
-- [x] 문서 체계 정립:
-  - `docs/architecture.md` 신규 생성 (설계 철학, 패턴, 확장 가이드)
-  - `docs/shared-modules.md` 업데이트 (Timer, Health Drop, Walkable 추가)
-  - `test-game/CLAUDE.md` 간소화 (docs 참조로 변경)
-  - `CLAUDE.md` 업데이트 (문서 링크 추가)
-
-### 2024-12-29
-- [x] EntityLayer 도입으로 타일/스프라이트 색깔 렌더링 문제 해결
-- [x] Separation Steering 구현 (적끼리 겹침 방지)
-- [x] Distance Culling 구현 (먼 적 자동 삭제)
-- [x] Elite 시스템 기반 (`is_elite`, 별도 카운트, 컬링 제외)
-- [x] SpawnManager에 `spawn_container` 추가 (의존성 명시화)
-- [x] 레벨업 무적 시간 논의
-
-### 이전
-- [x] WeaponManager 구현 (다중 무기 슬롯)
-- [x] MeleeWeaponBase + SlashEffect 구현
-- [x] StatManager + StatModifier 구현
-- [x] SkillManager 무기/패시브 분리
-- [x] 미니맵 구현 (지형 + POI)
-- [x] HUD 구현 (체력바, XP바)
-- [x] 스킬 시스템 구현
-- [x] 적 밀림 방지 수정
-- [x] 총알 겹침 버그 수정
+- [x] Elite 적 구현
+- [x] 보물상자 드롭 구현
+- [x] 웨이브/난이도 시스템 구현
+- [x] 체력 픽업 드롭 구현
+- [x] 레벨업 무적 시간 구현
 
 ---
 
-## 기술 부채
+## 지형 개선 설계 (다중 노이즈)
 
-- [x] ~~아키텍처 정리: Timer 시그널 EventBus로 이동~~
-- [x] ~~아키텍처 정리: 드롭 설정 EnemyData로 이동~~
-- [x] ~~아키텍처 정리: Walkable 설정 WorldConfig로 이동~~
-- [x] ~~EventBus 시그널 경고 정리~~ (warning_ignore 추가)
-- [x] ~~Integer division 경고 수정~~ (game_manager, hud, minimap, game_over)
-- [x] ~~파라미터 섀도잉 경고 수정~~ (minimap_base is_visible → visible_state)
-- [x] ~~skill_selection_ui 미사용 시그널 정리~~
-- [x] ~~공유 모듈 문서 최신화~~ (architecture.md 신규 생성, shared-modules.md 업데이트)
+### 현재 시스템
+```
+단일 노이즈 → 생물군계 결정
+noise < 0.0  → water
+noise 0.0~0.15 → sand
+noise 0.15~0.55 → grass
+noise > 0.55 → cliff
+```
+
+### 목표 시스템
+```
+┌─────────────┐   ┌─────────────┐
+│ Elevation   │   │  Moisture   │
+│   Noise     │   │   Noise     │
+└──────┬──────┘   └──────┬──────┘
+       │                 │
+       └────────┬────────┘
+                ▼
+        ┌───────────────┐
+        │ Biome Matrix  │
+        │               │
+        │  Low Moist    │  High Moist
+        │  ─────────    │  ──────────
+        │  High: Mountain│  High: Snow
+        │  Mid: Desert  │  Mid: Forest
+        │  Low: Beach   │  Low: Swamp
+        └───────────────┘
+```
+
+### 구현 계획
+1. `WorldConfig`에 다중 노이즈 설정 추가
+2. `WorldGenerator`에 elevation/moisture 노이즈 추가
+3. 생물군계 매트릭스 로직 구현
+4. 새로운 타일셋/터레인 추가
 
 ---
 
 ## 다음 액션
 
 ```
-1. 적 다양화
-   - 원거리 공격 적 (발사체 공격)
-   - 보스 적 (5분마다 등장)
+1. 지형 개선 (다중 노이즈)
+   - WorldConfig에 elevation/moisture 노이즈 설정 추가
+   - WorldGenerator 다중 노이즈 지원
+   - 생물군계 매트릭스 구현
 
-2. 무기 다양화
-   - 샷건 무기 데이터 추가
-   - 관통탄 (pierce count)
-
-3. 폴리시
-   - 레벨업 시 무적 시간 (2초)
-   - 사운드 (레벨업, 발사, 피격, BGM)
+2. 폴리시
+   - 킬/시간 통계 HUD
+   - 무기/패시브 슬롯 HUD
+   - 사운드 추가
 ```
