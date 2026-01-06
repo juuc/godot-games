@@ -47,6 +47,14 @@ signal enemy_killed(enemy: Node2D, position: Vector2, xp_value: int)
 @warning_ignore("unused_signal")
 signal enemy_damaged(enemy: Node2D, amount: float)
 
+# --- Boss Events ---
+@warning_ignore("unused_signal")
+signal boss_spawned(boss: Node2D)
+@warning_ignore("unused_signal")
+signal boss_defeated(boss: Node2D, position: Vector2)
+@warning_ignore("unused_signal")
+signal boss_phase_changed(boss: Node2D, phase: int, total_phases: int)
+
 # --- Combat Events ---
 @warning_ignore("unused_signal")
 signal damage_dealt(source: Node2D, target: Node2D, amount: float)  ## TODO: 데미지 팝업 구현 시

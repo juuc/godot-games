@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://ck7jmp85s0lst"]
+[gd_scene load_steps=16 format=3 uid="uid://ck7jmp85s0lst"]
 
 [ext_resource type="Texture2D" uid="uid://o0ijqtspq1ii" path="res://Assets/Paradise/FOR_TUTORIAL/tilemap1.png" id="1_2q6dc"]
 [ext_resource type="Script" uid="uid://dusw0ql8ndj2e" path="res://scenes/level.gd" id="1_w7c3h"]
@@ -8,6 +8,8 @@
 [ext_resource type="Resource" path="res://resources/world_config.tres" id="6_config"]
 [ext_resource type="Script" path="res://_shared/scripts/enemies/spawn_manager.gd" id="7_spawn"]
 [ext_resource type="Resource" path="res://resources/enemies/crab_data.tres" id="8_crab"]
+[ext_resource type="Resource" path="res://resources/enemies/ranged_enemy_data.tres" id="8_ranged"]
+[ext_resource type="Resource" path="res://resources/enemies/boss_data.tres" id="8_boss"]
 [ext_resource type="PackedScene" uid="uid://hud_001" path="res://scenes/ui/hud.tscn" id="9_hud"]
 [ext_resource type="PackedScene" uid="uid://minimap_001" path="res://scenes/ui/minimap.tscn" id="10_minimap"]
 [ext_resource type="PackedScene" uid="uid://gameover_001" path="res://scenes/ui/game_over.tscn" id="11_gameover"]
@@ -1313,10 +1315,12 @@ follow_viewport_enabled = true
 
 [node name="SpawnManager" type="Node" parent="EntityLayer"]
 script = ExtResource("7_spawn")
-enemy_data_list = [ExtResource("8_crab")]
+enemy_data_list = [ExtResource("8_crab"), ExtResource("8_ranged")]
 spawn_interval = 2.0
 enemies_per_spawn = 3
 max_enemies = 30
+boss_data = ExtResource("8_boss")
+boss_spawn_interval = 60.0
 min_spawn_distance = 100.0
 max_spawn_distance = 150.0
 

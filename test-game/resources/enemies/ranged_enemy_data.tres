@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://_shared/scripts/enemies/enemy_data.gd" id="1_data"]
+[ext_resource type="PackedScene" uid="uid://ranged_enemy_001" path="res://scenes/enemies/ranged_enemy.tscn" id="2_scene"]
+[ext_resource type="PackedScene" uid="uid://enemy_projectile_001" path="res://scenes/enemies/enemy_projectile.tscn" id="3_projectile"]
+
+[resource]
+script = ExtResource("1_data")
+enemy_name = "Ranged Crab"
+scene = ExtResource("2_scene")
+is_boss = false
+max_health = 1.5
+move_speed = 30.0
+damage = 8.0
+knockback_resistance = 0.0
+attack_type = 1
+attack_range = 150.0
+attack_cooldown = 2.0
+projectile_scene = ExtResource("3_projectile")
+projectile_speed = 180.0
+stop_to_attack = false
+xp_value = 2
+drop_chance = 1.0
+health_drop_base_chance = 0.05
+health_drop_low_hp_chance = 0.2
+health_drop_low_hp_threshold = 0.3
+treasure_drop_chance = 0.01
+health_scale = 1.0
+damage_scale = 1.0
+boss_scale = 2.0
+boss_phases = 1
+phase_health_thresholds = []

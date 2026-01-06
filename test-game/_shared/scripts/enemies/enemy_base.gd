@@ -8,6 +8,8 @@ extends CharacterBody2D
 ## 드롭 처리는 EnemyDropController에 위임
 
 const EnemyDropControllerClass = preload("res://_shared/scripts/enemies/enemy_drop_controller.gd")
+const EnemyAttackControllerClass = preload("res://_shared/scripts/enemies/enemy_attack_controller.gd")
+const BossControllerClass = preload("res://_shared/scripts/enemies/boss_controller.gd")
 
 signal died(enemy: EnemyBase, position: Vector2)
 signal damaged(enemy: EnemyBase, amount: float)
@@ -60,6 +62,12 @@ var health_multiplier: float = 1.0
 ## 드롭 컨트롤러 (드롭 로직 위임)
 var drop_controller: EnemyDropControllerClass
 
+## 공격 컨트롤러 (공격 로직 위임)
+var attack_controller: EnemyAttackControllerClass
+
+## 보스 컨트롤러 (보스 전용 - is_boss일 때만 사용)
+var boss_controller: BossControllerClass
+
 func set_damage_multiplier(mult: float) -> void:
 	damage_multiplier = mult
 
@@ -85,6 +93,7 @@ func _ready() -> void:
 
 	event_bus = Services.event_bus
 	drop_controller = EnemyDropControllerClass.new()
+	attack_controller = EnemyAttackControllerClass.new()
 
 	_load_config()
 
@@ -95,21 +104,31 @@ func _ready() -> void:
 
 	sprite = get_node_or_null("Sprite2D") as Sprite2D
 
+	# 보스 초기화
+	if enemy_data and enemy_data.is_boss:
+		_initialize_boss()
+
 	if event_bus:
 		event_bus.enemy_spawned.emit(self)
 
-## GameConfig에서 설정값 로드
+## GameConfig 및 EnemyData에서 설정값 로드
 func _load_config() -> void:
 	var config = Services.config
 	if not config:
 		return
 
 	knockback_decay = config.knockback_decay
-	attack_cooldown = config.enemy_attack_cooldown
-	attack_range = config.enemy_attack_range
 	separation_radius = config.enemy_separation_radius
 	separation_force = config.enemy_separation_force
 	animation_speed = config.enemy_animation_speed
+
+	# 공격 설정: EnemyData 우선, 없으면 GameConfig 사용
+	if enemy_data:
+		attack_cooldown = enemy_data.attack_cooldown
+		attack_range = enemy_data.attack_range
+	else:
+		attack_cooldown = config.enemy_attack_cooldown
+		attack_range = config.enemy_attack_range
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -123,7 +142,15 @@ func _physics_process(delta: float) -> void:
 	_check_attack()
 
 	if is_attacking:
-		velocity = knockback_velocity
+		# stop_to_attack 설정에 따라 공격 중 이동 여부 결정
+		var should_stop = enemy_data.stop_to_attack if enemy_data else true
+		if should_stop:
+			velocity = knockback_velocity
+		else:
+			# 원거리 적: 공격하면서 이동 가능
+			var move_velocity = _get_movement_velocity()
+			velocity = move_velocity + knockback_velocity
+			_update_sprite_direction()
 		_update_attack_animation(delta)
 	else:
 		var move_velocity = _get_movement_velocity()
@@ -215,18 +242,26 @@ func _update_attack_animation(delta: float) -> void:
 		_end_attack()
 
 func _deal_damage_to_target() -> void:
-	if not target:
+	if not target or not attack_controller:
 		return
 
-	var distance = global_position.distance_to(target.global_position)
-	if distance > attack_range * 1.5:
-		return
+	var base_damage = enemy_data.damage if enemy_data else 10.0
+	var damage_amount = base_damage * damage_multiplier
 
-	if target.has_method("take_damage"):
-		var base_damage = enemy_data.damage if enemy_data else 10.0
-		var damage_amount = base_damage * damage_multiplier
-		var knockback_dir = (target.global_position - global_position).normalized()
-		target.take_damage(damage_amount, knockback_dir)
+	# 공격 타입에 따라 처리
+	var current_attack_type = enemy_data.attack_type if enemy_data else EnemyData.AttackType.MELEE
+
+	if current_attack_type == EnemyData.AttackType.MELEE:
+		# 근접 공격: 범위 체크 후 데미지
+		var distance = global_position.distance_to(target.global_position)
+		if distance > attack_range * 1.5:
+			return
+		attack_controller.execute_melee_attack(target, damage_amount, global_position)
+	else:
+		# 원거리 공격: 발사체 생성
+		var projectile_speed = enemy_data.projectile_speed if enemy_data else 200.0
+		var projectile_scene = enemy_data.projectile_scene if enemy_data else null
+		attack_controller.execute_ranged_attack(global_position, target, damage_amount, projectile_speed, projectile_scene)
 
 func _end_attack() -> void:
 	is_attacking = false
@@ -255,6 +290,11 @@ func take_damage(amount: float, knockback_dir: Vector2 = Vector2.ZERO, knockback
 
 	_flash_damage()
 
+	# 보스 페이즈 체크
+	if boss_controller and enemy_data:
+		var health_ratio = current_health / (enemy_data.max_health * health_multiplier)
+		boss_controller.check_phase_transition(health_ratio)
+
 	if current_health <= 0:
 		_die()
 
@@ -277,6 +317,9 @@ func _die() -> void:
 
 	if event_bus:
 		event_bus.enemy_killed.emit(self, global_position, xp)
+		# 보스 처치 이벤트
+		if boss_controller and event_bus.has_signal("boss_defeated"):
+			event_bus.boss_defeated.emit(self, global_position)
 	else:
 		var level = get_tree().get_first_node_in_group("level")
 		if level and level.has_method("on_enemy_killed"):
@@ -291,3 +334,25 @@ func _die() -> void:
 ## 타겟 설정
 func set_target(new_target: Node2D) -> void:
 	target = new_target
+
+## 보스 초기화
+func _initialize_boss() -> void:
+	boss_controller = BossControllerClass.new()
+	boss_controller.initialize(self, enemy_data)
+	
+	# 보스 그룹 추가
+	add_to_group("bosses")
+	
+	# 보스 시그널 연결
+	boss_controller.phase_changed.connect(_on_boss_phase_changed)
+	boss_controller.boss_enraged.connect(_on_boss_enraged)
+	
+	# 보스 스폰 이벤트
+	if event_bus and event_bus.has_signal("boss_spawned"):
+		event_bus.boss_spawned.emit(self)
+
+func _on_boss_phase_changed(phase: int, total: int) -> void:
+	print("[Boss] Phase %d/%d" % [phase, total])
+
+func _on_boss_enraged() -> void:
+	print("[Boss] ENRAGED!")
