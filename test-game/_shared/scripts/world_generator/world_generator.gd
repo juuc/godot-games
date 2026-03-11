@@ -17,36 +17,69 @@ extends RefCounted
 ## var chunk_data = generator.generate_chunk(Vector2i(0, 0))
 ## ```
 
+## BiomeData 클래스 preload (로딩 순서 보장)
+const BiomeDataClass = preload("res://_shared/scripts/world_generator/biome_data.gd")
+
 var config: WorldConfig
-var noise: FastNoiseLite
+var noise: FastNoiseLite  ## Elevation noise
+var moisture_noise: FastNoiseLite  ## Moisture noise (for biome variety)
 
 # --- Data Caches ---
 var terrain_data: Dictionary = {}  # pos -> { layer_id -> terrain_id }
 var terrain_atlas_coords: Dictionary = {}  # pos -> { layer_id -> Vector3i }
+var biome_data: Dictionary = {}  # pos -> BiomeData (for color modulation)
 
 var data_mutex: Mutex = Mutex.new()
 
 func _init(world_config: WorldConfig) -> void:
 	config = world_config
 	noise = FastNoiseLite.new()
+	moisture_noise = FastNoiseLite.new()
 
 func initialize(custom_seed: int = 0) -> void:
 	var seed_value = custom_seed if custom_seed != 0 else config.noise_seed
 	if seed_value == 0:
 		seed_value = randi()
 
+	# Elevation noise setup
 	noise.seed = seed_value
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	noise.frequency = config.noise_frequency
 	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
 	noise.fractal_octaves = config.fractal_octaves
+	
+	# Moisture noise setup (다른 시드로 독립적인 노이즈)
+	var moisture_seed = config.moisture_noise_seed
+	if moisture_seed == 0:
+		moisture_seed = seed_value + 1000  # elevation과 다른 패턴
+	
+	moisture_noise.seed = moisture_seed
+	moisture_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	moisture_noise.frequency = config.moisture_frequency
+	moisture_noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	moisture_noise.fractal_octaves = config.moisture_octaves
 
-## 특정 위치의 노이즈 값 반환
+## 특정 위치의 elevation 노이즈 값 반환
 func get_noise_at(x: int, y: int) -> float:
 	return noise.get_noise_2d(x, y)
 
-## 특정 위치의 생물군계 판단
-func get_biome_at(x: int, y: int) -> Dictionary:
+## 특정 위치의 moisture 노이즈 값 반환
+func get_moisture_at(x: int, y: int) -> float:
+	return moisture_noise.get_noise_2d(x, y)
+
+## 특정 위치의 바이옴 데이터 반환 (elevation + moisture 매트릭스)
+func get_biome_data_at(x: int, y: int) -> BiomeDataClass:
+	var elevation = get_noise_at(x, y)
+	var moisture = get_moisture_at(x, y)
+	
+	var elev_level = config.get_elevation_level(elevation)
+	var moist_level = config.get_moisture_level(moisture)
+	
+	return config.get_biome_from_levels(elev_level, moist_level)
+
+## 특정 위치의 terrain layers 판단 (기존 호환용)
+## 반환: { layer_id -> terrain_id }
+func get_terrain_layers_at(x: int, y: int) -> Dictionary:
 	var n = get_noise_at(x, y)
 	var layers = {}
 
@@ -67,6 +100,10 @@ func get_biome_at(x: int, y: int) -> Dictionary:
 		layers[config.layer_cliff] = config.terrain_cliff
 
 	return layers
+
+## 기존 이름 호환 (deprecated, get_terrain_layers_at 사용 권장)
+func get_biome_at(x: int, y: int) -> Dictionary:
+	return get_terrain_layers_at(x, y)
 
 ## 안전한 스폰 위치 찾기 (나선형 검색)
 func find_safe_spawn() -> Vector2i:
@@ -110,24 +147,28 @@ func is_walkable(x: int, y: int) -> bool:
 	return config.is_tile_walkable(layers)
 
 ## 청크 데이터 생성 (백그라운드 스레드에서 호출 가능)
+## 반환: { "terrain": chunk_terrain_ids, "biomes": chunk_biome_data }
 func generate_chunk_data(chunk: Vector2i) -> Dictionary:
 	var start_pos = chunk * config.chunk_size
-	var chunk_ids = {}
+	var chunk_terrain = {}
+	var chunk_biomes = {}
 	var gen_buffer = 3
 
-	# Step 1: Terrain IDs 생성
+	# Step 1: Terrain layers 및 Biome 데이터 생성
 	for x in range(-gen_buffer, config.chunk_size + gen_buffer):
 		for y in range(-gen_buffer, config.chunk_size + gen_buffer):
 			var pos = start_pos + Vector2i(x, y)
-			chunk_ids[pos] = get_biome_at(pos.x, pos.y)
+			chunk_terrain[pos] = get_terrain_layers_at(pos.x, pos.y)
+			chunk_biomes[pos] = get_biome_data_at(pos.x, pos.y)
 
 	# 캐시에 저장
 	data_mutex.lock()
-	for pos in chunk_ids:
-		terrain_data[pos] = chunk_ids[pos]
+	for pos in chunk_terrain:
+		terrain_data[pos] = chunk_terrain[pos]
+		biome_data[pos] = chunk_biomes[pos]
 	data_mutex.unlock()
 
-	return chunk_ids
+	return { "terrain": chunk_terrain, "biomes": chunk_biomes }
 
 ## 나무 배치 가능 여부 확인
 func can_place_tree(pos: Vector2i, chunk_ids: Dictionary) -> bool:
@@ -172,9 +213,17 @@ func get_tree_coords(pos: Vector2i, chunk_ids: Dictionary) -> Vector2i:
 	else:
 		return config.tree_forest
 
+## 캐시된 바이옴 데이터 가져오기 (없으면 null)
+func get_cached_biome(pos: Vector2i) -> BiomeDataClass:
+	data_mutex.lock()
+	var result = biome_data.get(pos, null)
+	data_mutex.unlock()
+	return result
+
 ## 데이터 캐시 클리어
 func clear_cache() -> void:
 	data_mutex.lock()
 	terrain_data.clear()
 	terrain_atlas_coords.clear()
+	biome_data.clear()
 	data_mutex.unlock()

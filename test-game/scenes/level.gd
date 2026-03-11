@@ -20,6 +20,9 @@ const ChunkManagerClass = preload("res://_shared/scripts/world_generator/chunk_m
 var player: Node2D = null
 var chunk_manager: ChunkManagerClass
 
+# --- Biome Overlay ---
+var biome_overlay_container: Node2D
+
 # --- Debug Visualization ---
 var debug_container: Node2D
 
@@ -52,6 +55,9 @@ func _ready() -> void:
 	# ChunkManager 초기화
 	_setup_chunk_manager()
 
+	# 바이옴 오버레이 컨테이너 설정
+	_setup_biome_overlay_container()
+
 	# 디버그 컨테이너 설정
 	_setup_debug_container()
 
@@ -72,6 +78,14 @@ func _setup_chunk_manager() -> void:
 	# 시그널 연결
 	chunk_manager.initial_load_complete.connect(_on_initial_load_complete)
 	chunk_manager.loading_progress.connect(_on_loading_progress)
+
+## 바이옴 오버레이 컨테이너 설정
+func _setup_biome_overlay_container() -> void:
+	biome_overlay_container = Node2D.new()
+	biome_overlay_container.name = "BiomeOverlay"
+	biome_overlay_container.z_index = 1  # 타일맵 위, 엔티티 아래
+	add_child(biome_overlay_container)
+	chunk_manager.set_biome_overlay_container(biome_overlay_container)
 
 ## 디버그 컨테이너 설정
 func _setup_debug_container() -> void:
@@ -141,9 +155,17 @@ func on_enemy_killed(xp_value: int = 0) -> void:
 		game_manager.total_xp += xp_value
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_TAB:
-		if debug_container:
-			debug_container.visible = not debug_container.visible
+	if event is InputEventKey and event.pressed:
+		match event.keycode:
+			KEY_TAB:
+				# 디버그 노이즈 레이어 토글
+				if debug_container:
+					debug_container.visible = not debug_container.visible
+			KEY_B:
+				# 바이옴 오버레이 토글
+				if biome_overlay_container:
+					biome_overlay_container.visible = not biome_overlay_container.visible
+					chunk_manager.set_biome_overlay_enabled(biome_overlay_container.visible)
 
 func _process(_delta: float) -> void:
 	# 초기 로딩 중에는 game_over 체크 무시 (청크 로딩 필요)
@@ -161,6 +183,10 @@ func _process(_delta: float) -> void:
 func is_tile_walkable(global_pos: Vector2) -> bool:
 	var map_pos = tile_map.local_to_map(global_pos)
 	return chunk_manager.is_tile_walkable(map_pos)
+
+## WorldGenerator 반환 (미니맵 등에서 사용)
+func get_generator() -> WorldGenerator:
+	return chunk_manager.generator
 
 ## 씬 정리 시 시그널 연결 해제 (메모리 누수 방지)
 func _exit_tree() -> void:

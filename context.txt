@@ -1,0 +1,1300 @@
+
+╭─── Claude Code v2.0.76 ──────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                  Welcome back jwc!                 │ started                 │
+│                                                    │ ✔ Run /init to create … │
+│                     * ▐▛███▜▌ *                    │ ─────────────────────── │
+│                    * ▝▜█████▛▘ *                   │ Recent activity         │
+│                     *  ▘▘ ▝▝  *                    │ No recent activity      │
+│                                                    │                         │
+│  Opus 4.5 · Claude Max · cdo.bootalk@gmail.com's   │                         │
+│  Organization                                      │                         │
+│                ~/games/godot-games                 │                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+══════════════════ Conversation compacted · ctrl+o for history ═════════════════
+  ⎿  Read test-game/TODO.md (200 lines)
+  ⎿  Read test-game/_shared/scripts/enemies/enemy_base.gd (428 lines)
+  ⎿  Read test-game/scenes/ui/damage_popup.tscn (21 lines)
+  ⎿  Read test-game/_shared/scripts/ui/damage_popup.gd (83 lines)
+  ⎿  Read test-game/CLAUDE.md (152 lines)
+  ⎿  Plan file referenced (~/.claude/plans/majestic-coalescing-lighthouse.md)
+  ⎿ SessionStart:compact says: Plugin hook error: 📝 Claude-Mem Context Loaded
+       ℹ️  Note: This appears as stderr but is informational only
+
+
+    [games] recent context
+    ────────────────────────────────────────────────────────────
+
+    Legend: 🎯 session-request | 🔴 bugfix | 🟣 feature | 🔄 refactor | ✅ 
+    change | 🔵 discovery | ⚖️  decision
+
+    💡 Column Key
+      Read: Tokens to read this observation (cost to learn it now)
+      Work: Tokens spent on work that produced this record (🔍 research, 🛠️ 
+    building, ⚖️  deciding)
+
+    💡 Context Index: This semantic index (titles, types, files, tokens) is 
+    usually sufficient to understand past work.
+
+    When you need implementation details, rationale, or debugging context:
+      - Use the mem-search skill to fetch full observations on-demand
+      - Critical types (🔴 bugfix, ⚖️ decision) often need detailed fetching
+      - Trust this index over re-reading code for past decisions and learnings
+
+    📊 Context Economics
+      Loading: 50 observations (14,700 tokens to read)
+      Work investment: 245,296 tokens spent on research, building, and decisions
+      Your savings: 230,596 tokens (94% reduction from reuse)
+
+    Dec 30, 2025
+
+    🎯 #S1233 Treasure chest drop implementation - user reviewed game
+    development progress and received a prioritized task list with 
+    recommendations (Dec 30 at 12:11 PM)
+
+    🎯 #S1235 Treasure chest drop implementation (보물상자 드롭 구현) - Add
+    treasure chest pickup system to game (Dec 30 at 12:50 PM)
+
+    🎯 #S1237 Verified implementation of treasure chest drop system matches the
+    planned design (Dec 30 at 12:59 PM)
+
+    🎯 #S1239 Test 50% probability treasure chest drop mechanic - Game running
+    with golden treasure chest drop on enemy defeat (Dec 30 at 1:09 PM)
+
+    🎯 #S1240 Debug output verification for Godot game session - confirming game
+     mechanics are functioning without errors (Dec 30 at 1:10 PM)
+
+    🎯 #S1241 Implemented treasure chest drop system for Godot game and
+    committed changes to remote repository (Dec 30 at 1:12 PM)
+
+    General
+      #18878  1:16 PM  🔵  TODO Roadmap for Test Game Development (~343t) (🔍 
+    4,822t)
+
+    ../../Users/juucheol/games/godot-games/test-game/TODO.md
+      #18879  1:16 PM  ✅  TODO Roadmap Reprioritized - Treasure Chest Deferred
+    (~332t) (🛠️ 5,363t)
+      #18880           ✅  TODO.md Changes Committed to Main Branch (~221t) (🛠️ 
+    860t)
+
+    General
+      #18881  1:16 PM  ✅  Commits Pushed to Remote Repository (~169t) (🛠️ 
+    4,384t)
+
+    🎯 #S1243 User reviewed TODO.md and requested next task selection from a
+    prioritized list of game features to implement (Dec 30 at 1:16 PM)
+
+    🎯 #S1247 Elite 적 구현 - Implementing Elite enemy type with spawn
+    mechanics, visual distinction, and stat scaling (Dec 30 at 2:32 PM)
+
+    General
+      #18901  2:47 PM  🔵  Elite Implementation Task Initiated (~181t) (🔍 
+    4,044t)
+      #18902           🔵  Godot Test Game Project Structure Examined (~272t)
+    (🔍 5,103t)
+      #18903           🔵  Godot Game Source Files Cataloged (~313t) (🔍 1,273t)
+      #18904           🔵  Minimap System Implementation Files Located (~276t)
+    (🔍 917t)
+      #18905           🔵  Enemy System Architecture Identified (~251t) (🔍 
+    921t)
+      #18906           🔵  Enemy Spawn Manager System Located (~186t) (🔍 732t)
+      #18907           🔵  Enemy Data Resource File Identified (~164t) (🔍 528t)
+      #18908           🔵  Game Resource Architecture Mapped (~305t) (🔍 990t)
+      #18909           🔵  Enemy Data Structure and Properties Defined (~353t)
+    (🔍 1,260t)
+      #18910           🔵  Enemy Base Class Complete Implementation Analyzed
+    (~479t) (🔍 5,587t)
+      #18911           🔵  Spawn Manager Wave and Difficulty System Analyzed
+    (~476t) (🔍 6,679t)
+      #18913           🔵  Crab Enemy Data Resource Configuration (~257t) (🔍 
+    1,109t)
+      #18915  2:48 PM  🔵  Minimap Base Class with POI System Analyzed (~470t)
+    (🔍 6,131t)
+      #18916           🔵  Test Game Minimap Configuration Implemented (~389t)
+    (🔍 2,485t)
+      #18917           🔵  Minimap POI Configuration Resource Structure (~358t)
+    (🔍 1,104t)
+      #18918           🔵  Crab Enemy Scene Structure Defined (~320t) (🔍 
+    1,096t)
+      #18919  2:49 PM  🔵  Elite Enemy System Infrastructure Discovered (~498t)
+    (🔍 7,531t)
+
+    ../../Users/juucheol/.claude/plans/breezy-noodling-castle.md
+      #18920  2:49 PM  ⚖️  Elite Enemy Implementation Plan Created (~390t) (⚖️ 
+    3,366t)
+
+    General
+      #18921  2:49 PM  ⚖️  Elite Enemy Implementation Plan Approved (~335t) (⚖️ 
+    3,135t)
+      #18922           🔵  EnemyBase Current Structure Reviewed (~305t) (🔍 
+    934t)
+
+    ../../Users/juucheol/games/godot-games/test-game/_shared/scripts/enemies/ene
+    my_base.gd
+      #18923  2:50 PM  🟣  Elite Enemy System Implementation (~417t) (🛠️ 
+    10,499t)
+
+    General
+      #18924  2:50 PM  🔵  SpawnManager Elite Enemy Integration Points (~448t)
+    (🔍 6,489t)
+
+    ../../Users/juucheol/games/godot-games/test-game/_shared/scripts/enemies/spa
+    wn_manager.gd
+      #18926  2:50 PM  ✅  Elite Settings Export Group Added to SpawnManager
+    (~291t) (🛠️ 7,803t)
+      #18927           ✅  Added Elite Spawn Timer Variable (~258t) (🛠️ 10,926t)
+
+    godot-games/test-game/_shared/scripts/enemies/spawn_manager.gd
+      #18928  2:50 PM  ✅  Elite spawn timer reset on game restart (~202t) (🛠️ 
+    11,286t)
+
+    ../../Users/juucheol/games/godot-games/test-game/_shared/scripts/enemies/spa
+    wn_manager.gd
+      #18929  2:51 PM  🟣  Elite Enemy Automatic Time-Based Spawning (~293t) (🛠️
+     11,328t)
+      #18930           🟣  Timer-based Elite Enemy Auto-spawning (~378t) (🛠️ 
+    13,674t)
+
+    General
+      #18931  2:51 PM  🔵  Minimap implementation with POI configurations for
+    game entities (~480t) (🔍 5,890t)
+
+    ../../Users/juucheol/games/godot-games/test-game/scenes/ui/minimap.gd
+      #18932  2:51 PM  🟣  Elite Enemy Minimap Configuration Added (~321t) (🛠️ 
+    7,535t)
+
+    General
+      #18933  2:52 PM  ✅  Godot Project Launched in Debug Mode (~164t) (🛠️ 
+    4,412t)
+
+    🎯 #S1252 Implement and test 5-second Elite enemy spawn interval in Godot
+    game, with visual confirmation of spawning behavior and minimap indicators. 
+    (Dec 30 at 2:52 PM)
+
+    General
+      #18944  4:40 PM  🔵  User Request for Delayed Output in Korean (~225t) (🔍
+     4,058t)
+      #18947  4:41 PM  🔵  User Request for Delayed Output (~189t) (🔍 4,058t)
+
+    ../../Users/juucheol/games/godot-games/test-game/_shared/scripts/enemies/spa
+    wn_manager.gd
+      #18948  4:41 PM  ✅  Elite Enemy Spawn Interval Reduced for Testing
+    (~216t) (🛠️ 11,280t)
+
+    General
+      #18951  4:41 PM  🔵  User Request for Delayed Output (~155t) (🔍 4,058t)
+      #18952           ✅  Godot Project Started in Debug Mode (~165t) (🛠️ 
+    4,491t)
+
+    godot-games/test-game/_shared/scripts/enemies/spawn_manager.gd
+      #18971  5:07 PM  ✅  Elite Spawn Interval Restored to Production Value
+    (~179t) (🛠️ 10,993t)
+
+    test-game/_shared/scripts/enemies/enemy_base.gd
+      #18972  5:07 PM  🟣  Elite Enemy System Implementation (~445t) (🛠️ 6,850t)
+      #18973           ✅  Elite Enemy System Changes Staged for Commit (~150t)
+    (🛠️ 1,087t)
+      #18975  5:08 PM  ✅  Elite Enemy Implementation Files Staged for Commit
+    (~175t) (🛠️ 4,435t)
+      #18976           🟣  Elite Enemy Auto-Spawn and Visual Distinction System
+    Implemented (~358t) (🛠️ 987t)
+      #18977           🟣  Elite Enemy System Implementation Committed (~362t)
+    (🛠️ 5,573t)
+
+    test-game/TODO.md
+      #18978  5:08 PM  ✅  Elite Enemy Task Marked Complete in TODO
+        The TODO.md tracking document was updated to reflect the completion of 
+    the Elite enemy system implementation. The previously incomplete task for 
+    "Elite 적 구현" was marked as done and given specific implementation details
+     rather than generic placeholders. The update documents that Elite enemies 
+    spawn every 60 seconds, receive 3x stat multiplier, and appear on the 
+    minimap with a blinking effect. This update serves as project documentation 
+    confirming the feature's completion and establishing a baseline for future 
+    enemy variation work (ranged enemies and boss enemies remain in the 
+    backlog).
+        (~276t) (🛠️ 4,896t)
+
+
+    ../../Users/juucheol/games/godot-games/test-game/TODO.md
+      #18980  5:09 PM  ✅  Elite Enemy Implementation Documented in TODO
+        The Elite enemy system implementation has been completed and documented 
+    in the project TODO. Elite enemies are now spawning every 60 seconds with 
+    tripled statistics (health, damage, speed) making them significantly more 
+    dangerous than regular enemies. These Elite enemies are also marked with 
+    special visual indicators on the minimap, allowing players to identify and 
+    prepare for these tougher threats. The documentation confirms this feature 
+    is fully implemented and functional.
+        (~219t) (🛠️ 8,493t)
+
+      #18981           ✅  Elite Enemy Removed from Next Actions Backlog
+        The TODO backlog has been updated to reflect completion of the Elite 
+    enemy system. Since Elite enemies are now fully functional with 60-second 
+    spawn intervals, 3x stat multipliers, and minimap visualization, the task 
+    has been removed from the upcoming work queue. The next actions backlog now 
+    focuses on remaining enemy diversity features (ranged attack enemies and 
+    boss encounters), weapon system enhancements (shotgun variants and piercing 
+    projectiles), and UI polish features (damage popups and kill statistics).
+        (~231t) (🛠️ 4,980t)
+
+
+    General
+      #18982  5:09 PM  🔵  User confirms working feature, requests next 
+    implementation
+        The user has confirmed that the current feature is working correctly and
+     is satisfied with the implementation. They are now seeking guidance on what
+     feature or functionality to implement next. This represents a transition 
+    point in the development cycle where the team has completed one deliverable 
+    and is ready to plan the next feature. However, the user has not specified 
+    which feature to prioritize, so the next step would involve either 
+    clarifying which features are available for implementation or discussing 
+    priority options.
+        (~241t) (🔍 4,069t)
+
+
+    test-game/TODO.md
+      #18983  5:09 PM  ✅  TODO.md updated and committed to git
+        The TODO.md file in the test-game directory was updated to mark the 
+    Elite enemy feature as complete and document the next action items for the 
+    project. The changes were committed to git with the message "docs: Elite 적 
+    완료 표시 및 다음 액션 업데이트" (marking Elite complete and updating next 
+    actions) and successfully pushed to the main branch. This update reflects 
+    the project's progress tracking and helps maintain visibility into what has 
+    been completed and what comes next in the development roadmap.
+        (~219t) (🛠️ 4,792t)
+
+
+    🎯 #S1254 User confirmed recent features work well and requested suggestions
+     for next features to implement (Dec 30 at 5:09 PM)
+
+    Investigated: The development team examined completed features (treasure
+    chest drops, elite enemy spawning) and evaluated multiple feature categories
+     for implementation priority
+
+    Learned: The game architecture supports progressive enemy difficulty (elite
+    variants with 3x stats), loot drop mechanics with UI selection, and minimap 
+    visual feedback. The team organized remaining features into priority tiers 
+    based on gameplay value versus polish needs
+
+    Completed: Treasure chest drop system implemented with 1% spawn rate and
+    weapon/passive selection UI; Elite enemy system created with 60-second spawn
+     intervals, tripled statistics, and minimap indicator blinking
+
+    Next Steps: User is deciding between five feature options: ranged attack
+    enemies, boss enemies (5-minute spawn), shotgun/pierce weapons, damage 
+    number popups, or an alternative feature. Implementation will proceed once 
+    user selects priority
+
+
+    💰 Access 245k tokens of past research & decisions for just 14,700t. Use the
+     mem-search skill to access memories by ID instead of re-reading files.
+
+    💡 New! Wrap all or part of any message with <private> ... </private> to 
+    prevent storing sensitive information in your observation history.
+
+    💬 Community https://discord.gg/J4wttp9vDu
+    📺 Watch live in browser http://localhost:37777/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+⏺ 데미지 팝업 시스템은 이미 커밋 완료되었습니다 (commit 98705c9).
+
+  TODO.md 기준 남은 작업 목록:
+
+  P1: High (재미 요소)
+
+  | 작업              | 설명                 |
+  |-------------------|----------------------|
+  | 원거리 공격 적    | 발사체로 공격하는 적 |
+  | 보스 적           | 5분마다 등장, 대형   |
+  | 샷건 무기         | 여러 발 동시 발사    |
+  | 대검(슬래시) 무기 | 근접 광역 공격       |
+  | 관통탄            | pierce count 구현    |
+
+  P2: Medium (폴리시)
+
+  | 작업                 | 설명                    |
+  |----------------------|-------------------------|
+  | 킬/시간 통계 UI      | 게임 내 통계 표시       |
+  | 레벨업 무적 시간     | 2초간 무적              |
+  | 무기/패시브 슬롯 HUD | 장착 현황 표시          |
+  | 사운드               | 레벨업, 발사, 피격, BGM |
+
+  어떤 작업을 진행할까요?
+
+> 게임 자체의 시스템적인 요소를 좀 더 강화해보자. 이 게임을 단순히 뱀서류 
+한판하고 끝나는게 아니라 다른 거대한 게임 내의 미니게임같은 느낌으로 
+쓸거라서. 어떻게 해야 그게 연결돼? godot engine에서는? 
+
+⏺ 좋은 질문입니다. Godot에서 미니게임 통합 방식을 정리해보면:
+
+  미니게임 통합 아키텍처
+
+  ┌─────────────────────────────────────────────────────────┐
+  │                    Parent Game                          │
+  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
+  │  │ SaveSystem  │  │ PlayerData  │  │ Inventory   │     │
+  │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘     │
+  │         └────────────────┼────────────────┘            │
+  │                          ▼                              │
+  │              ┌───────────────────────┐                  │
+  │              │   MiniGameManager     │                  │
+  │              │  - start_minigame()   │                  │
+  │              │  - on_minigame_end()  │                  │
+  │              └───────────┬───────────┘                  │
+  └──────────────────────────┼──────────────────────────────┘
+                             │ 입력: 캐릭터, 난이도, 보너스
+                             │ 출력: 점수, 생존시간, 보상
+                             ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │                  Mini Game (test-game)                  │
+  │  ┌─────────────────────────────────────────────────┐   │
+  │  │              MiniGameInterface                   │   │
+  │  │  - setup(config: Dictionary)                    │   │
+  │  │  - get_result() -> MiniGameResult               │   │
+  │  │  - signal game_ended(result)                    │   │
+  │  └─────────────────────────────────────────────────┘   │
+  └─────────────────────────────────────────────────────────┘
+
+  Godot에서 연결 방식
+
+  | 방식                         | 장점                | 단점      |
+  |------------------------------|---------------------|-----------|
+  | 씬 전환                      | 간단, 메모리 분리   | 로딩 필요 |
+  | SubViewport                  | 동시 실행 가능, PIP | 성능 비용 |
+  | 별도 프로젝트 → PCK 익스포트 | 완전 독립           | 빌드 복잡 |
+
+  필요한 인터페이스
+
+  # 미니게임 입력
+  class_name MiniGameConfig
+  var character_id: String      # 외부 캐릭터 연동
+  var difficulty: int           # 난이도 (1-5)
+  var time_limit: float         # 제한 시간 (0=무제한)
+  var bonus_stats: Dictionary   # 외부 보너스 적용
+
+  # 미니게임 출력
+  class_name MiniGameResult
+  var score: int                # 점수
+  var survival_time: float      # 생존 시간
+  var kills: int                # 처치 수
+  var items_collected: Array    # 획득 아이템 ID
+  var success: bool             # 성공/실패
+
+  선택지
+
+  어떤 방향으로 갈지에 따라 구현이 달라집니다:
+
+  1. 같은 프로젝트 내 씬 - 부모 게임과 미니게임이 하나의 Godot 프로젝트
+  2. 별도 프로젝트 (PCK 모듈) - 미니게임을 독립 빌드 후 임포트
+  3. SubViewport 내장 - 미니게임을 창 안의 창처럼 실행
+
+  부모 게임 구조가 어떻게 되어있나요? (Godot 프로젝트인지, 다른 엔진인지, 아직 없는지)
+
+> ㄴㄴ 아직 부모 게임이 없어. 같은 엔진으로 하는게낫겠지? 
+
+⏺ 네, 같은 Godot 엔진이면 훨씬 간단합니다.
+
+  추천 구조
+
+  godot-games/
+  ├── main-game/           # 부모 게임 (나중에 생성)
+  │   ├── project.godot
+  │   └── ...
+  │
+  ├── test-game/           # 미니게임 (현재)
+  │   ├── project.godot
+  │   └── ...
+  │
+  └── _shared/             # 공유 모듈 (이미 있음!)
+      └── scripts/
+
+  _shared/ 폴더가 이미 있어서 공유 구조가 갖춰져 있습니다.
+
+  지금 해두면 좋은 것
+
+  미니게임 입출력 인터페이스를 먼저 만들어두면, 나중에 부모 게임 만들 때 바로 연결 가능:
+
+  # 미니게임 시작 시
+  MiniGameInterface.start({
+      "character": "warrior",
+      "difficulty": 2,
+      "time_limit": 600  # 10분
+  })
+
+  # 미니게임 종료 시 → 부모 게임에 결과 반환
+  signal game_ended(result: MiniGameResult)
+  # result = { score: 1500, kills: 47, survival_time: 423.5, success: true }
+
+  다음 단계
+
+  1. MiniGameInterface - 시작/종료 인터페이스 추가
+  2. MiniGameResult - 결과 데이터 구조 정의
+  3. GameManager 연동 - 기존 통계를 Result로 패키징
+
+  이 인터페이스 시스템 구현할까요? 기존 GameManager에 이미 total_kills, game_time 같은 통계가 있어서 연결만 하면 됩니다.
+
+> ㅇㅇ 인터페이스 구현해줘. 간단하게 게임 켜면 시작화면에서 test-game 시작 
+버튼을 누르면 시작하게 하고, 통계 버튼을 누르면 지금까지 플레이한 게임의
+통계를 볼 수 있는 느낌으로 구현해보고 싶어. ultrathink
+
+⏺ 이건 여러 시스템이 연결되는 작업이라 계획을 먼저 세우겠습니다.
+                                                                   
+⏺ Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+⏺ 기존 계획 파일은 데미지 팝업 관련이므로 새 작업을 위해 탐색을 시작합니다.
+
+⏺ 3 Explore agents finished (ctrl+o to expand)
+   ├─ Explore GameManager stats · 4 tool uses · 23.3k tokens
+   │  ⎿  Done
+   ├─ Explore project structure/scenes · 14 tool uses · 71.1k tokens
+   │  ⎿  Done
+   └─ Explore UI patterns/styling · 15 tool uses · 35.5k tokens
+      ⎿  Done
+
+⏺ 탐색 완료. 이제 설계를 진행합니다.
+
+⏺ Plan(Design minigame interface system)
+  ⎿  Done (14 tool uses · 79.6k tokens · 1m 48s)                           
+
+⏺ 설계 완료. 계획 파일을 업데이트합니다.
+
+⏺ Reading Plan(~/.claude/plans/majestic-coalescing-lighthouse.md)
+  ⎿  Read 97 lines
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ 계획 파일 업데이트 완료. 승인을 요청합니다.
+                                                                           
+⏺ User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/majestic-coalescing-lighthouse.md · 
+     /plan to edit
+     메인 메뉴 + 통계 시스템 구현 계획
+
+     목표
+
+     미니게임 인터페이스 시스템 구현:
+     - 시작 화면에서 "게임 시작" / "통계" 버튼
+     - 게임 결과를 저장하고 누적 통계 표시
+     - 나중에 부모 게임과 연동 가능한 구조
+
+     ---
+     게임 플로우
+
+     [Game Launch]
+          ↓
+     [MainMenu] ←──────────────────┐
+       ├─ Start Game → [level.tscn]  │
+       ├─ Statistics → [StatsScreen] │
+       └─ Quit                       │
+                                     │
+     [level.tscn - Gameplay]         │
+          ↓                          │
+     [Player Dies]                   │
+          ↓                          │
+     [GameManager.trigger_game_over] │
+          ↓                          │
+     [StatsManager.save_result()]    │
+          ↓                          │
+     [GameOver UI]                   │
+       ├─ Restart → [level.tscn]     │
+       └─ Main Menu ─────────────────┘
+
+     ---
+     파일 구조
+
+     신규 생성
+
+     | 파일                                  | 설명                    |
+     |---------------------------------------|-------------------------|
+     | _shared/scripts/core/stats_manager.gd | 통계 저장/로드 Autoload |
+     | scenes/ui/main_menu.tscn              | 메인 메뉴 씬            |
+     | scenes/ui/main_menu.gd                | 메인 메뉴 스크립트      |
+     | scenes/ui/stats_screen.tscn           | 통계 화면 씬            |
+     | scenes/ui/stats_screen.gd             | 통계 화면 스크립트      |
+
+     수정
+
+     | 파일            | 변경 내용                                          
+          |
+     |-----------------|----------------------------------------------------
+     -----|
+     | project.godot   | main_scene → main_menu.tscn, StatsManager autoload 
+     추가 |
+     | game_manager.gd | trigger_game_over()에서 StatsManager.save_result() 
+     호출 |
+     | game_over.tscn  | "종료" 버튼 → "메인 메뉴" 버튼으로 변경            
+          |
+     | game_over.gd    | 메인 메뉴 이동 로직 추가                           
+          |
+
+     ---
+     데이터 구조
+
+     게임 결과 (단일 게임)
+
+     {
+         "timestamp": 1704067200,
+         "level": 5,
+         "kills": 42,
+         "time": 183.5,
+         "xp": 1250,
+         "wave": 3
+     }
+
+     저장 파일 (user://stats.json)
+
+     {
+         "version": 1,
+         "total_plays": 15,
+         "total_time": 2500.0,
+         "total_kills": 450,
+         "total_xp": 12000,
+         "best_level": 8,
+         "best_kills": 75,
+         "best_time": 312.5,
+         "best_wave": 5,
+         "recent_results": [ ... ]  # 최근 10게임
+     }
+
+     ---
+     UI 레이아웃
+
+     메인 메뉴
+
+     ┌─────────────────────────────┐
+     │                             │
+     │        TEST GAME            │  ← 64px 타이틀
+     │                             │
+     │      [ Start Game ]         │  ← 200x60 버튼
+     │      [ Statistics ]         │
+     │      [    Quit    ]         │
+     │                             │
+     └─────────────────────────────┘
+
+     통계 화면
+
+     ┌─────────────────────────────┐
+     │        STATISTICS           │
+     │                             │
+     │  Total Plays:     15        │
+     │  Total Time:      41:40     │
+     │  Total Kills:     450       │
+     │  Best Level:      8  ←오렌지│
+     │  Best Kills:      75 ←오렌지│
+     │  Best Time:       5:12      │
+     │                             │
+     │  ─── Recent Games ───       │
+     │  Lv.5 | 42 kills | 3:03     │
+     │  Lv.3 | 28 kills | 2:15     │
+     │                             │
+     │        [ Back ]             │
+     └─────────────────────────────┘
+
+     ---
+     구현 순서
+
+     Phase 1: StatsManager (핵심)
+
+     1. stats_manager.gd 생성 - save_result(), get_stats(), 
+     get_formatted_stats()
+     2. project.godot에 StatsManager autoload 추가
+     3. game_manager.gd에서 trigger_game_over() 수정 - 결과 저장
+
+     Phase 2: 메인 메뉴
+
+     4. main_menu.tscn 생성 - 타이틀 + 3개 버튼
+     5. main_menu.gd 생성 - 버튼 핸들러
+     6. project.godot main_scene 변경
+
+     Phase 3: 통계 화면
+
+     7. stats_screen.tscn 생성 - GridContainer + RecentList
+     8. stats_screen.gd 생성 - 통계 표시 로직
+
+     Phase 4: 게임오버 연동
+
+     9. game_over.tscn 버튼 텍스트 변경
+     10. game_over.gd 메인 메뉴 이동 로직 추가
+
+     ---
+     핵심 파일 경로
+
+     - /Users/juucheol/games/godot-games/test-game/project.godot
+     - /Users/juucheol/games/godot-games/test-game/_shared/scripts/core/game
+     _manager.gd
+     - /Users/juucheol/games/godot-games/test-game/scenes/ui/game_over.gd
+     - /Users/juucheol/games/godot-games/test-game/scenes/ui/game_over.tscn
+
+
+
+
+
+
+⏺ 계획 승인됨. 구현을 시작합니다.
+
+⏺ Write(test-game/_shared/scripts/core/stats_manager.gd)
+  ⎿  Wrote 122 lines to test-game/_shared/scripts/core/stats_manager.gd
+      1 extends Node
+      2 ## 통계 관리자 (Autoload)
+      3 ## 게임 결과를 저장하고 누적 통계를 제공합니다.
+      4 ## 저장 경로: user://stats.json
+      5 const SAVE_PATH = "user://stats.json"
+      6 const MAX_RECENT_RESULTS = 10
+      7 const SAVE_VERSION = 1
+     … +112 lines (ctrl+o to expand)
+
+⏺ Read(test-game/project.godot)
+  ⎿  Read 93 lines
+  ⎿  Loaded CLAUDE.md
+
+⏺ Update(test-game/project.godot)
+  ⎿  Added 1 line                                                        
+      20  
+      21  EventBus="*res://_shared/scripts/core/event_bus.gd"
+      22  GameManager="*res://_shared/scripts/core/game_manager.gd"
+      23 +StatsManager="*res://_shared/scripts/core/stats_manager.gd"    
+      24  
+      25  [display]
+      26  
+
+⏺ Read(test-game/_shared/scripts/core/game_manager.gd)
+  ⎿  Read 249 lines
+
+⏺ Update(test-game/_shared/scripts/core/game_manager.gd)
+  ⎿  Added 5 lines                                                       
+      119  
+      120    var stats = get_final_stats()
+      121  
+      122 +  # StatsManager에 결과 저장                                  
+      123 +  var stats_manager = get_node_or_null("/root/StatsManager")  
+      124 +  if stats_manager:                                           
+      125 +    stats_manager.save_result(stats)                          
+      126 +                                                              
+      127    if event_bus:
+      128      event_bus.game_over.emit(stats)
+      129  
+
+⏺ Write(test-game/scenes/ui/main_menu.gd)
+  ⎿  Wrote 77 lines to test-game/scenes/ui/main_menu.gd                  
+      1 extends CanvasLayer
+      2 ## 메인 메뉴 화면
+      3 ## 게임 시작, 통계, 종료 버튼 제공
+      4 @onready var start_button: Button = $Panel/VBoxContainer/StartBut
+        ton
+      5 @onready var stats_button: Button = $Panel/VBoxContainer/StatsBut
+        ton
+      6 @onready var quit_button: Button = $Panel/VBoxContainer/QuitButto
+        n
+      7 var stats_screen_scene: PackedScene
+     … +67 lines (ctrl+o to expand)
+
+⏺ Write(test-game/scenes/ui/main_menu.tscn)
+  ⎿  Wrote 70 lines to test-game/scenes/ui/main_menu.tscn                
+      1 [gd_scene load_steps=2 format=3 uid="uid://main_menu_001"]
+      2 [ext_resource type="Script" path="res://scenes/ui/main_menu.gd" i
+        d="1_script"]
+      3 [node name="MainMenu" type="CanvasLayer"]
+      4 layer = 10
+      5 script = ExtResource("1_script")
+      6 [node name="Panel" type="Control" parent="."]
+      7 layout_mode = 3
+     … +60 lines (ctrl+o to expand)
+
+⏺ Write(test-game/scenes/ui/stats_screen.gd)
+  ⎿  Wrote 128 lines to test-game/scenes/ui/stats_screen.gd              
+      1 extends CanvasLayer
+      2 ## 통계 화면
+      3 ## StatsManager의 누적 통계를 표시
+      4 signal back_requested
+      5 @onready var stats_container: GridContainer = $Panel/VBoxContaine
+        r/StatsContainer
+      6 @onready var recent_list: VBoxContainer = $Panel/VBoxContainer/Re
+        centSection/RecentList
+      7 @onready var back_button: Button = $Panel/VBoxContainer/BackButto
+        n
+     … +118 lines (ctrl+o to expand)
+
+⏺ Write(test-game/scenes/ui/stats_screen.tscn)
+  ⎿  Wrote 89 lines to test-game/scenes/ui/stats_screen.tscn             
+      1 [gd_scene load_steps=2 format=3 uid="uid://stats_screen_001"]
+      2 [ext_resource type="Script" path="res://scenes/ui/stats_screen.gd
+        " id="1_script"]
+      3 [node name="StatsScreen" type="CanvasLayer"]
+      4 layer = 11
+      5 script = ExtResource("1_script")
+      6 [node name="Panel" type="Control" parent="."]
+      7 layout_mode = 3
+     … +79 lines (ctrl+o to expand)
+
+⏺ Read(test-game/scenes/ui/game_over.gd)
+  ⎿  Read 93 lines
+
+⏺ Read(test-game/scenes/ui/game_over.tscn)
+  ⎿  Read 72 lines
+
+⏺ Update(test-game/scenes/ui/game_over.gd)
+  ⎿  Added 2 lines, removed 2 lines                                      
+      84  func _on_quit_pressed() -> void:
+      85    get_tree().paused = false
+      86    main_menu_requested.emit()
+      87 -  # 메인 메뉴가 없으면 게임 종료                               
+      88 -  get_tree().quit()                                            
+      87 +  # 메인 메뉴로 이동                                           
+      88 +  get_tree().change_scene_to_file("res://scenes/ui/main_menu.ts
+         +cn")                                                           
+      89  
+      90  ## 외부에서 게임오버 트리거 (하위 호환성)
+      91  func trigger_game_over(stats: Dictionary = {}) -> void:
+
+⏺ Update(test-game/scenes/ui/game_over.tscn)
+  ⎿  Added 1 line, removed 1 line                                        
+      68  custom_minimum_size = Vector2(120, 50)
+      69  layout_mode = 2
+      70  theme_override_font_sizes/font_size = 20
+      71 -text = "종료"                                                  
+      71 +text = "메인 메뉴"                                             
+
+⏺ Update(test-game/project.godot)
+  ⎿  Added 1 line, removed 1 line                                        
+      12  
+      13  config/name="test-game"
+      14  config/version="1.1.0"
+      15 -run/main_scene="res://scenes/level.tscn"                       
+      15 +run/main_scene="res://scenes/ui/main_menu.tscn"                
+      16  config/features=PackedStringArray("4.5", "GL Compatibility")
+      17  config/icon="res://icon.svg"
+      18  
+
+⏺ 모든 파일 구현 완료. 게임을 실행해서 테스트합니다.
+
+⏺ godot-mcp - run_project (MCP)(projectPath:
+                               "/Users/juucheol/games/godot-games/test-game")
+  ⎿ Godot project started in debug mode. Use get_debug_output to see output
+    .
+
+  ⎿ {                                                                      
+      "output": [
+        "Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengin
+    … +10 lines (ctrl+o to expand)
+
+  ⎿ {                                                                      
+      "output": [
+        "Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengin
+    … +12 lines (ctrl+o to expand)
+
+  ⎿  {                                                                     
+       "message": "Godot project stopped",
+       "finalOutput": [
+     … +15 lines (ctrl+o to expand)
+
+⏺ 구현 완료. 게임이 정상적으로 실행됩니다.
+
+  완료된 구현
+
+  신규 파일 (5개)
+
+  | 파일                                  | 설명                    |
+  |---------------------------------------|-------------------------|
+  | _shared/scripts/core/stats_manager.gd | 통계 저장/로드 Autoload |
+  | scenes/ui/main_menu.tscn              | 메인 메뉴 씬            |
+  | scenes/ui/main_menu.gd                | 메인 메뉴 스크립트      |
+  | scenes/ui/stats_screen.tscn           | 통계 화면 씬            |
+  | scenes/ui/stats_screen.gd             | 통계 화면 스크립트      |
+
+  수정된 파일 (4개)
+
+  | 파일            | 변경                                               |
+  |-----------------|----------------------------------------------------|
+  | project.godot   | main_scene → main_menu.tscn, StatsManager autoload |
+  | game_manager.gd | trigger_game_over()에서 통계 저장                  |
+  | game_over.gd    | "종료" → 메인 메뉴 이동                            |
+  | game_over.tscn  | 버튼 텍스트 변경                                   |
+
+  게임 플로우
+
+  게임 실행 → 메인 메뉴 → Start Game → 플레이 → 사망 → 게임오버
+                   ↑                                    │
+                   └─── 메인 메뉴 버튼 ─────────────────┘
+
+  통계 저장 위치
+
+  - user://stats.json (자동 저장)
+
+  테스트해보고 문제 있으면 알려줘!
+
+> 커밋하고 TODO.md 업데이트해줘 
+
+⏺ Bash(git status)
+  ⎿  현재 브랜치 main                                    
+     브랜치가 'origin/main'에 맞게 업데이트된 상태입니다.
+     … +20 lines (ctrl+o to expand)
+
+⏺ Bash(git log --oneline -3)
+  ⎿  98705c9 데미지 숫자 팝업 시스템 추가로 타격감 개선         
+     c6ca0b9 docs: Elite 적 완료 표시 및 다음 액션 업데이트
+     3dc102a feat: Elite 적 자동 스폰 및 시각적 구분 시스템 구현
+
+⏺ Read(test-game/TODO.md)
+  ⎿  Read 200 lines
+
+⏺ Update(test-game/TODO.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      1  # Test Game - TODO
+      2  
+      3 -> **Last Updated**: 2024-12-30                                  
+      3 +> **Last Updated**: 2024-12-31                                  
+      4  
+      5  ## Architecture Overview
+      6  
+
+⏺ Update(test-game/TODO.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      62  
+      63  ### P3: Low (나중에)
+      64  
+      65 -- [ ] 메인 메뉴                                                
+      65 +- [x] ~~메인 메뉴~~ - StatsManager + 통계 화면 포함            
+      66  - [ ] 캐릭터 선택
+      67  - [ ] 메타 진행 (영구 업그레이드)
+      68  - [ ] 지형 개선 (다중 노이즈)
+
+⏺ Update(test-game/TODO.md)
+  ⎿  Added 1 line                                                        
+      77  |--------|------|------|
+      78  | EventBus | `core/event_bus.gd` | 전역 이벤트 버스 |
+      79  | GameManager | `core/game_manager.gd` | 게임 상태 관리 |
+      80 +| StatsManager | `core/stats_manager.gd` | 통계 저장/로드 (user
+         +://stats.json) |                                               
+      81  
+      82  ### Player Systems
+      83  | 시스템 | 파일 | 설명 |
+
+⏺ Update(test-game/TODO.md)
+  ⎿  Added 2 lines                                                       
+      108  ### UI Systems
+      109  | 시스템 | 파일 | 설명 |
+      110  |--------|------|------|
+      111 +| MainMenu | `ui/main_menu.gd` | 메인 메뉴 (시작, 통계, 종료) 
+          +|                                                             
+      112 +| StatsScreen | `ui/stats_screen.gd` | 누적 통계 표시 |       
+      113  | HUD | `ui/hud_base.gd` | 체력바, XP바 |
+      114  | Minimap | `ui/minimap_base.gd` | 미니맵 + POI |
+      115  | SkillSelection | `ui/skill_selection_ui.gd` | 레벨업 선택 UI
+            |
+
+⏺ Update(test-game/TODO.md)
+  ⎿  Added 7 lines                                                       
+      125  
+      126  ## 최근 변경 이력
+      127  
+      128 +### 2024-12-31                                                
+      129 +- [x] 메인 메뉴 시스템 구현 (Start Game, Statistics, Quit)    
+      130 +- [x] StatsManager 구현 (통계 저장/로드, user://stats.json)   
+      131 +- [x] 통계 화면 구현 (누적 통계, 최근 게임 5개)               
+      132 +- [x] 게임오버 → 메인 메뉴 연결 (버튼 변경)                   
+      133 +- [x] 데미지 숫자 팝업 구현 (팡팡 튀는 타격감)                
+      134 +                                                              
+      135  ### 2024-12-30
+      136  - [x] Elite 적 구현 (60초마다, 스탯 3배, 미니맵 표시)
+      137  - [x] 보물상자 드롭 구현 (1% 확률, 무기/패시브 선택 UI)
+
+⏺ Update(test-game/TODO.md)
+  ⎿  Added 2 lines, removed 2 lines                                      
+      204     - 관통탄 (pierce count)
+      205  
+      206  3. 폴리시
+      207 -   - 데미지 숫자 팝업                                         
+      208 -   - 킬/시간 통계 UI                                          
+      207 +   - 레벨업 시 무적 시간 (2초)                                
+      208 +   - 사운드 (레벨업, 발사, 피격, BGM)                         
+      209  ```
+
+⏺ Bash(git add test-game/_shared/scripts/core/stats_manager.gd
+      test-game/scenes/ui/main_menu.gd test-game/scenes/ui/main_menu.tscn
+      test-game/scenes/ui/stats_screen.gd…)
+  ⎿  (No content)
+
+⏺ Bash(git commit -m "feat: 메인 메뉴 및 통계 시스템 구현…)
+  ⎿  [main 78436bc] feat: 메인 메뉴 및 통계 시스템 구현                 
+      10 files changed, 506 insertions(+), 9 deletions(-)
+      create mode 100644 test-game/_shared/scripts/core/stats_manager.gd
+     … +4 lines (ctrl+o to expand)
+
+⏺ Bash(git push && git status)
+  ⎿  현재 브랜치 main                                    
+     브랜치가 'origin/main'에 맞게 업데이트된 상태입니다.
+     … +3 lines (ctrl+o to expand)
+
+⏺ 커밋 및 푸시 완료 (78436bc).
+
+  변경 내용
+
+  신규 파일 (5개)
+  - stats_manager.gd - 통계 저장/로드
+  - main_menu.gd/tscn - 메인 메뉴
+  - stats_screen.gd/tscn - 통계 화면
+
+  수정 파일 (5개)
+  - project.godot - main_scene, StatsManager autoload
+  - game_manager.gd - 통계 저장 호출
+  - game_over.gd/tscn - 메인 메뉴 버튼
+
+  TODO.md 업데이트
+  - P3 "메인 메뉴" 완료 표시
+  - Core/UI Systems 테이블 업데이트
+  - 2024-12-31 변경 이력 추가
+
+  다음 작업은?
+
+> 아키텍쳐 관련 문서들도 찾아서 다 최신화해줘 
+
+⏺ Read(docs/architecture.md)
+  ⎿  Read 502 lines
+
+⏺ Read(docs/shared-modules.md)
+  ⎿  Read 502 lines
+
+⏺ Read(test-game/CLAUDE.md)
+  ⎿  Read 152 lines
+
+⏺ Read(CLAUDE.md)
+  ⎿  Read 93 lines
+
+⏺ Update(docs/architecture.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      2  
+      3  뱀서라이크 게임 프레임워크의 아키텍처 설계 문서입니다.
+      4  
+      5 -> **Last Updated**: 2024-12-30                                  
+      5 +> **Last Updated**: 2024-12-31                                  
+      6  
+      7  ## 목차
+      8  
+
+⏺ Update(docs/architecture.md)
+  ⎿  Added 1 line                                                        
+      75      subgraph Core["Core Layer (Autoload)"]
+      76          EB[EventBus]
+      77          GM[GameManager]
+      78 +        SM_STATS[StatsManager]                                 
+      79          AM[AudioManager]
+      80      end
+      81  
+
+⏺ Update(docs/architecture.md)
+  ⎿  Added 2 lines                                                       
+       93          end
+       94  
+       95          subgraph UISys["UI"]
+       96 +            MENU[MainMenu]                                    
+       97 +            STATS_UI[StatsScreen]                             
+       98              HUD[HUD]
+       99              MINI[Minimap]
+      100              SKILL[SkillSelection]
+
+⏺ Update(docs/architecture.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      126  
+      127  | Layer | 책임 | 예시 |
+      128  |-------|------|------|
+      129 -| **Core** | 전역 서비스, 상태 관리 | EventBus, GameManager | 
+      129 +| **Core** | 전역 서비스, 상태 관리 | EventBus, GameManager, S
+          +tatsManager |                                                 
+      130  | **Game** | 게임 로직, 엔티티 | Player, Enemy, UI |
+      131  | **Data** | 설정, 밸런싱 값 | WeaponData, EnemyData |
+      132  
+
+⏺ Update(docs/architecture.md)
+  ⎿  Added 23 lines                                                      
+      356  
+      357  ## 씬 구조
+      358  
+      359 +### 게임 플로우                                               
+      360 +                                                              
+      361 +```                                                           
+      362 +[게임 실행]                                                   
+      363 +     ↓                                                        
+      364 +[MainMenu] ←────────────────────┐                             
+      365 +  ├─ Start Game → [level.tscn]  │                             
+      366 +  ├─ Statistics → [StatsScreen] │                             
+      367 +  └─ Quit                       │                             
+      368 +                                │                             
+      369 +[level.tscn - 게임플레이]        │                            
+      370 +     ↓                          │                             
+      371 +[Player Dies]                   │                             
+      372 +     ↓                          │                             
+      373 +[GameManager.trigger_game_over] │                             
+      374 +     ↓                          │                             
+      375 +[StatsManager.save_result()]    │  ← user://stats.json 저장   
+      376 +     ↓                          │                             
+      377 +[GameOver UI]                   │                             
+      378 +  ├─ Restart → [level.tscn]     │                             
+      379 +  └─ Main Menu ─────────────────┘                             
+      380 +```                                                           
+      381 +                                                              
+      382  ### EntityLayer 패턴
+      383  
+      384  **문제**: TileMap 색상이 캐릭터/적 스프라이트에 영향
+
+⏺ Update(docs/shared-modules.md)
+  ⎿  Added 1 line, removed 1 line                                        
+      2  
+      3  뱀서라이크 게임 프레임워크의 공유 모듈 API 레퍼런스입니다.
+      4  
+      5 -> **Last Updated**: 2024-12-30                                  
+      5 +> **Last Updated**: 2024-12-31                                  
+      6  >
+      7  > **관련 문서**: [아키텍처 가이드](architecture.md)
+      8  
+
+⏺ Update(docs/shared-modules.md)
+  ⎿  Added 1 line                                                        
+      13  ├── core/
+      14  │   ├── event_bus.gd           # 전역 이벤트 버스 (Autoload)
+      15  │   ├── game_manager.gd        # 게임 상태 관리 (Autoload)
+      16 +│   ├── stats_manager.gd       # 통계 저장/로드 (Autoload)     
+      17  │   └── audio_manager.gd       # 오디오 관리 (Autoload)
+      18  ├── player/
+      19  │   └── player_base.gd         # 플레이어 기본 클래스
+
+⏺ Update(docs/shared-modules.md)
+  ⎿  Added 2 lines                                                       
+      38  │   ├── stat_modifier.gd       # 스탯 수정자 (FLAT/PERCENT/MULT
+          IPLY)
+      39  │   └── stat_manager.gd        # 중앙 스탯 계산기
+      40  ├── ui/
+      41 +│   ├── main_menu.gd           # 메인 메뉴 (게임 시작 화면)    
+      42 +│   ├── stats_screen.gd        # 통계 화면                     
+      43  │   ├── skill_selection_ui.gd  # 스킬 선택 UI 베이스
+      44  │   ├── hud_base.gd            # HUD 베이스
+      45  │   └── minimap_base.gd        # 미니맵 베이스
+
+⏺ Update(docs/shared-modules.md)
+  ⎿  Added 28 lines                                                      
+      181  - `timer_updated(remaining, total)` - 매 프레임
+      182  - `cycle_completed(cycle_number)` - 사이클 완료 시
+      183  
+      184 +### StatsManager                                              
+      185 +                                                              
+      186 +게임 결과를 저장하고 누적 통계를 제공합니다.                  
+      187 +                                                              
+      188 +```gdscript                                                   
+      189 +# 저장 경로                                                   
+      190 +const SAVE_PATH = "user://stats.json"                         
+      191 +                                                              
+      192 +# 게임 결과 저장 (게임오버 시 자동 호출)                      
+      193 +StatsManager.save_result(result: Dictionary)                  
+      194 +                                                              
+      195 +# 통계 조회                                                   
+      196 +StatsManager.get_stats() -> Dictionary                        
+      197 +StatsManager.get_formatted_stats() -> Dictionary  # UI 표시용 
+      198 +StatsManager.has_played() -> bool                             
+      199 +                                                              
+      200 +# 통계 초기화                                                 
+      201 +StatsManager.reset_stats()                                    
+      202 +```                                                           
+      203 +                                                              
+      204 +저장되는 통계:                                                
+      205 +- `total_plays` - 총 플레이 횟수                              
+      206 +- `total_time` - 총 플레이 시간                               
+      207 +- `total_kills` - 총 처치 수                                  
+      208 +- `total_xp` - 총 획득 XP                                     
+      209 +- `best_level`, `best_kills`, `best_time`, `best_wave` - 최고 
+          +기록                                                          
+      210 +- `recent_results` - 최근 10게임 기록                         
+      211 +                                                              
+      212  ---
+      213  
+      214  ## Stat System
+
+⏺ Update(docs/shared-modules.md)
+  ⎿  Added 1 line                                                        
+      88  [autoload]
+      89  EventBus="*res://_shared/scripts/core/event_bus.gd"
+      90  GameManager="*res://_shared/scripts/core/game_manager.gd"
+      91 +StatsManager="*res://_shared/scripts/core/stats_manager.gd"    
+      92  
+      93  [layer_names]
+      94  2d_physics/layer_1="landscape"
+
+⏺ Update(docs/shared-modules.md)
+  ⎿  Added 24 lines                                                      
+      401  
+      402  ## UI Systems
+      403  
+      404 +### MainMenu                                                  
+      405 +                                                              
+      406 +게임 시작 화면:                                               
+      407 +                                                              
+      408 +```gdscript                                                   
+      409 +# 버튼                                                        
+      410 +- Start Game → level.tscn으로 전환                            
+      411 +- Statistics → StatsScreen 표시                               
+      412 +- Quit → 게임 종료                                            
+      413 +```                                                           
+      414 +                                                              
+      415 +### StatsScreen                                               
+      416 +                                                              
+      417 +누적 통계 표시:                                               
+      418 +                                                              
+      419 +```gdscript                                                   
+      420 +signal back_requested                                         
+      421 +                                                              
+      422 +# StatsManager에서 통계 조회                                  
+      423 +# - 누적 통계 (플레이 수, 총 시간, 총 킬 등)                  
+      424 +# - 최고 기록 (오렌지 하이라이트)                             
+      425 +# - 최근 게임 5개 표시                                        
+      426 +```                                                           
+      427 +                                                              
+      428  ### EntityLayer 패턴
+      429  
+      430  TileMap 색깔이 캐릭터에 영향주는 문제 해결:
+
+⏺ Update(test-game/CLAUDE.md)
+  ⎿  Added 1 line                                                        
+      42  [autoload]
+      43  EventBus="*res://_shared/scripts/core/event_bus.gd"
+      44  GameManager="*res://_shared/scripts/core/game_manager.gd"
+      45 +StatsManager="*res://_shared/scripts/core/stats_manager.gd"    
+      46  ```
+      47  
+      48  ### Collision Layers
+
+⏺ Update(test-game/CLAUDE.md)
+  ⎿  Added 2 lines                                                       
+      65  |------|------|
+      66  | `scenes/level.gd` | 월드 관리, 청크, TileMap |
+      67  | `scenes/player.gd` | 이동, 발사, 레벨업 |
+      68 +| `scenes/ui/main_menu.gd` | 메인 메뉴 (시작, 통계, 종료) |    
+      69 +| `scenes/ui/stats_screen.gd` | 누적 통계 화면 |               
+      70  | `scenes/ui/hud.gd` | 체력바, XP바, 타이머 |
+      71  | `scenes/ui/game_over.gd` | 게임오버 화면 |
+      72  
+
+⏺ Update(test-game/CLAUDE.md)
+  ⎿  Added 1 line                                                        
+      85  |------|-------|------|
+      86  | `_shared/scripts/core/event_bus.gd` | - | 이벤트 허브 |
+      87  | `_shared/scripts/core/game_manager.gd` | - | 상태/통계 |
+      88 +| `_shared/scripts/core/stats_manager.gd` | - | 통계 저장/로드 
+         +|                                                              
+      89  | `_shared/scripts/enemies/spawn_manager.gd` | SpawnManager | 
+          스폰, 컬링 |
+      90  | `_shared/scripts/weapons/weapon_manager.gd` | WeaponManager |
+           다중 무기 |
+      91  | `_shared/scripts/progression/stat_manager.gd` | StatManager |
+           스탯 계산 |
+
+⏺ Update(CLAUDE.md)
+  ⎿  Added 1 line                                                        
+      34  |------|------|
+      35  | `event_bus.gd` | 전역 이벤트 버스 (시스템 간 느슨한 결합) |
+      36  | `game_manager.gd` | 게임 상태/통계 관리, 타이머 |
+      37 +| `stats_manager.gd` | 통계 저장/로드 (user://stats.json) |    
+      38  | `audio_manager.gd` | 중앙 오디오 관리 (SFX 풀, 음악) |
+      39  
+      40  ### Player
+
+⏺ Update(CLAUDE.md)
+  ⎿  Added 1 line                                                        
+      80     [autoload]
+      81     EventBus="*res://_shared/scripts/core/event_bus.gd"
+      82     GameManager="*res://_shared/scripts/core/game_manager.gd"
+      83 +   StatsManager="*res://_shared/scripts/core/stats_manager.gd" 
+      84     ```
+      85  4. [architecture.md](docs/architecture.md)의 확장 가이드 참고
+      86  
+
+⏺ Bash(git add docs/architecture.md docs/shared-modules.md test-game/CLAUDE.md
+      CLAUDE.md && git commit -m "docs: StatsManager 및 메인 메뉴 시스템
+      문서화…)
+  ⎿  [main 1324b7b] docs: StatsManager 및 메인 메뉴 시스템 문서화
+      4 files changed, 91 insertions(+), 3 deletions(-)
+
+⏺ Bash(git push && git status)
+  ⎿  현재 브랜치 main                                    
+     브랜치가 'origin/main'에 맞게 업데이트된 상태입니다.
+     … +3 lines (ctrl+o to expand)
+
+⏺ 문서 업데이트 완료 (1324b7b).
+
+  업데이트된 문서
+
+  | 문서                   | 변경 내용                                              |
+  |------------------------|--------------------------------------------------------|
+  | docs/architecture.md   | 게임 플로우 다이어그램, Core Layer에 StatsManager 추가 |
+  | docs/shared-modules.md | StatsManager API, MainMenu/StatsScreen 섹션 추가       |
+  | test-game/CLAUDE.md    | Autoload, Key Files 테이블 업데이트                    |
+  | CLAUDE.md              | Core 모듈 테이블, 새 게임 생성 가이드 업데이트         |
+
+  모든 아키텍처 문서가 최신 상태입니다.
+
+> 다음 기능 뭐 할까? TODO.md 다시 작서앻보자 
+
+⏺ Read(test-game/TODO.md)
+  ⎿  Read 210 lines
+
+⏺ 남은 작업 목록
+
+  P1: High (재미 요소)
+
+  | 작업              | 설명                                  | 복잡도 |
+  |-------------------|---------------------------------------|--------|
+  | 원거리 공격 적    | 발사체로 공격하는 새 적 타입          | ⭐⭐   |
+  | 보스 적           | 5분마다 등장, 대형 보스               | ⭐⭐⭐ |
+  | 샷건 무기         | 여러 발 동시 발사                     | ⭐     |
+  | 대검(슬래시) 무기 | 근접 광역 공격 (MeleeWeaponBase 활용) | ⭐     |
+  | 관통탄            | pierce count로 여러 적 관통           | ⭐⭐   |
+
+  P2: Medium (폴리시)
+
+  | 작업                 | 설명                    | 복잡도 |
+  |----------------------|-------------------------|--------|
+  | 킬/시간 통계 UI      | 인게임 통계 표시        | ⭐     |
+  | 레벨업 무적          | 2초간 무적 시간         | ⭐     |
+  | 무기/패시브 슬롯 HUD | 장착 현황 표시          | ⭐     |
+  | 사운드               | 레벨업, 발사, 피격, BGM | ⭐⭐   |
+
+  P3: Low (나중에)
+
+  | 작업        | 설명                   |
+  |-------------|------------------------|
+  | 캐릭터 선택 | 여러 캐릭터 중 선택    |
+  | 메타 진행   | 영구 업그레이드 시스템 |
+  | 지형 개선   | 다중 노이즈            |
+  | 업적 시스템 | 달성 목표              |
+
+  ---
+  추천 순서
+
+  1. 샷건 무기 (간단, 기존 시스템 활용)
+  2. 관통탄 (Projectile 확장)
+  3. 원거리 공격 적 (새 적 타입)
+  4. 레벨업 무적 (간단한 폴리시)
+  5. 보스 적 (복잡, 마지막)
+
+  뭐 할래?
+
+
+

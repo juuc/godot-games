@@ -28,6 +28,11 @@ var is_initial_load: bool = true
 var initial_chunks_needed: int = 0
 var initial_chunks_loaded: int = 0
 
+# --- Biome Color Overlay ---
+var biome_overlay_container: Node2D
+var biome_overlay_sprites: Dictionary = {}  # chunk -> Sprite2D
+var biome_overlay_enabled: bool = true  ## 바이옴 색상 오버레이 활성화
+
 # --- Debug Visualization ---
 var debug_container: Node2D
 var debug_sprites: Dictionary = {}
@@ -47,6 +52,21 @@ func initialize() -> void:
 ## 디버그 컨테이너 설정 (level에서 호출)
 func set_debug_container(container: Node2D) -> void:
 	debug_container = container
+
+## 바이옴 오버레이 컨테이너 설정 (level에서 호출)
+func set_biome_overlay_container(container: Node2D) -> void:
+	biome_overlay_container = container
+
+## 바이옴 오버레이 활성화/비활성화
+func set_biome_overlay_enabled(enabled: bool) -> void:
+	biome_overlay_enabled = enabled
+	if not enabled:
+		# 모든 오버레이 숨기기
+		for sprite in biome_overlay_sprites.values():
+			sprite.visible = false
+	else:
+		for sprite in biome_overlay_sprites.values():
+			sprite.visible = true
 
 ## 안전한 스폰 위치 찾기 (Generator 위임)
 func find_safe_spawn() -> Vector2i:
@@ -165,6 +185,10 @@ func _draw_chunk(chunk: Vector2i) -> void:
 	generator.data_mutex.unlock()
 	drawn_chunks[chunk] = true
 
+	# 바이옴 색상 오버레이 생성
+	if biome_overlay_container and biome_overlay_enabled:
+		_create_biome_overlay(chunk)
+
 	# 초기 로딩 진행률 업데이트
 	if is_initial_load:
 		var progress = float(drawn_chunks.size()) / float(initial_chunks_needed)
@@ -187,6 +211,11 @@ func _undraw_chunk(chunk: Vector2i) -> void:
 			for i in range(tile_map.get_layers_count()):
 				tile_map.erase_cell(i, pos)
 
+	# 바이옴 오버레이 제거
+	if biome_overlay_sprites.has(chunk):
+		biome_overlay_sprites[chunk].queue_free()
+		biome_overlay_sprites.erase(chunk)
+
 	if debug_sprites.has(chunk):
 		debug_sprites[chunk].queue_free()
 		debug_sprites.erase(chunk)
@@ -202,14 +231,16 @@ func _check_initial_loading_complete() -> void:
 
 ## 청크 생성 (백그라운드 스레드)
 func _generate_chunk(chunk: Vector2i) -> void:
-	# Step 1: Generate terrain data
-	var chunk_ids = generator.generate_chunk_data(chunk)
+	# Step 1: Generate terrain data (이제 terrain + biomes 반환)
+	var chunk_data = generator.generate_chunk_data(chunk)
+	var chunk_terrain = chunk_data["terrain"]  # pos -> { layer_id -> terrain_id }
+	# chunk_data["biomes"]는 이미 generator.biome_data에 캐시됨
 
 	# Step 2: Solve autotiling
-	var chunk_coords = autotile_solver.resolve(chunk, chunk_ids, generator)
+	var chunk_coords = autotile_solver.resolve(chunk, chunk_terrain, generator)
 
 	# Step 3: Trees
-	_place_trees(chunk, chunk_ids, chunk_coords)
+	_place_trees(chunk, chunk_terrain, chunk_coords)
 
 	# Commit to cache
 	generator.data_mutex.lock()
@@ -263,6 +294,46 @@ func _place_trees(chunk: Vector2i, chunk_ids: Dictionary, chunk_coords: Dictiona
 				var tree_coords = generator.get_tree_coords(pos, chunk_ids)
 				var alt_id = 1 if randf() > 0.5 else 0
 				chunk_coords[pos][world_config.layer_env] = Vector3i(tree_coords.x, tree_coords.y, alt_id)
+
+## 바이옴 색상 오버레이 생성
+func _create_biome_overlay(chunk: Vector2i) -> void:
+	var texture = _create_biome_texture(chunk)
+	if texture:
+		var sprite = Sprite2D.new()
+		sprite.texture = texture
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		sprite.scale = Vector2(16, 16)  # 16x16 픽셀 타일 크기로 스케일
+		sprite.centered = false
+		sprite.position = Vector2(chunk * world_config.chunk_size * 16)
+		# Multiply 블렌드 모드로 색상 적용
+		sprite.modulate.a = 0.3  # 30% 투명도로 은은하게
+		biome_overlay_container.add_child(sprite)
+		biome_overlay_sprites[chunk] = sprite
+
+## 바이옴 색상 텍스처 생성
+func _create_biome_texture(chunk: Vector2i) -> ImageTexture:
+	var img = Image.create(world_config.chunk_size, world_config.chunk_size, false, Image.FORMAT_RGBA8)
+	var start_pos = chunk * world_config.chunk_size
+	
+	generator.data_mutex.lock()
+	for x in range(world_config.chunk_size):
+		for y in range(world_config.chunk_size):
+			var pos = start_pos + Vector2i(x, y)
+			var biome = generator.biome_data.get(pos, null)
+			
+			if biome:
+				# 바이옴 색상 적용 (color_modulate 사용)
+				var color = biome.color_modulate
+				# 물 타일이면 water_color 사용
+				var terrain = generator.terrain_data.get(pos, {})
+				if terrain.has(world_config.layer_water) and not terrain.has(world_config.layer_sand) and not terrain.has(world_config.layer_grass):
+					color = biome.water_color
+				img.set_pixel(x, y, color)
+			else:
+				img.set_pixel(x, y, Color.WHITE)
+	generator.data_mutex.unlock()
+	
+	return ImageTexture.create_from_image(img)
 
 ## 디버그 스프라이트 생성
 func _create_debug_sprite(chunk: Vector2i) -> void:
